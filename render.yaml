@@ -29,19 +29,18 @@ services:
           name: cold-chain-control-db
           property: connectionString
       - key: CORS_ORIGIN
-        sync: false        # set to the static site URL after first deploy
+        sync: false # set to the static site URL after first deploy
 
   # Frontend (Vite static build)
-  - type: web
+  - type: static
     name: cold-chain-control-web
-    runtime: static
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        sync: false        # set to the API service public URL
+        sync: false # set to the API service public URL
     routes:
       - type: rewrite
         source: /*
