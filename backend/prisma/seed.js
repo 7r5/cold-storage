@@ -57,24 +57,33 @@ async function main() {
     }
   }
 
-  // One demo route CDMX -> Puebla for the first truck
+  // Ruta compleja: San Juan del Río -> Querétaro Capital (Vía Carretera 57)
   const existingRoute = await prisma.route.findFirst({
-    where: { truckId: trucks[0].id, originName: 'CDMX' },
+    where: { truckId: trucks[0].id, originName: 'San Juan del Río' },
   });
+
   if (!existingRoute) {
     await prisma.route.create({
       data: {
         truckId: trucks[0].id,
-        originName: 'CDMX',
-        destinationName: 'Puebla',
+        originName: 'San Juan del Río, Qro',
+        destinationName: 'Querétaro Capital, Qro',
         status: 'PENDING',
-        // Approx waypoints CDMX -> Puebla
+        // Trayectoria detallada siguiendo la curva de la autopista
         waypoints: [
-          [19.4326, -99.1332],
-          [19.3500, -98.9000],
-          [19.2800, -98.6000],
-          [19.1800, -98.3000],
-          [19.0414, -98.2063],
+          [20.3889, -100.0000], // Salida de San Juan del Río (Centro)
+          [20.4050, -100.0250], // Incorporación a la Autopista 57
+          [20.4320, -100.0630], // Pasando Loma Linda
+          [20.4650, -100.1020], // Cercanías de la caseta auxiliar
+          [20.4980, -100.1380], // Pedro Escobedo
+          [20.5150, -100.1850], // Zona industrial de El Sauz
+          [20.5380, -100.2350], // Entrada a El Colorado
+          [20.5550, -100.2820], // Parque Industrial El Marqués
+          [20.5720, -100.3210], // Monumento a Conín
+          [20.5840, -100.3550], // Inicio de la Cuesta China
+          [20.5910, -100.3750], // Vista Alegre / Bernardo Quintana
+          [20.5935, -100.3885], // Los Arcos de Querétaro
+          [20.5925, -100.4050], // Centro Histórico (Destino final)
         ],
       },
     });
