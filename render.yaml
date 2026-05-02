@@ -32,9 +32,9 @@ services:
         sync: false # set to the static site URL after first deploy
 
   # Frontend (Vite static build)
-  - type: static
+  - type: web
     name: cold-chain-control-web
-    plan: free
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
