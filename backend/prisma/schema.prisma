@@ -1,0 +1,144 @@
+// Prisma schema for Cold Chain Control
+// Run: npx prisma db push  (pushes schema to DB without migrations)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// App user (dummy auth, plain password — POC only)
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ROOT
+}
+
+// A refrigerated truck
+model Truck {
+  id         Int          @id @default(autoincrement())
+  plate      String       @unique
+  model      String
+  driverName String       @map("driver_name")
+  status     TruckStatus  @default(IDLE)
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  boxes     Box[]
+  routes    Route[]
+  positions Position[]
+
+  @@map("trucks")
+}
+
+enum TruckStatus {
+  IDLE
+  ON_ROUTE
+  MAINTENANCE
+}
+
+// A refrigerated box mounted on a truck
+model Box {
+  id              Int    @id @default(autoincrement())
+  code            String @unique
+  truckId         Int    @map("truck_id")
+  // Acceptable ranges; outside these = alert
+  targetTempMin   Float  @map("target_temp_min")
+  targetTempMax   Float  @map("target_temp_max")
+  targetHumMin    Float  @map("target_hum_min")
+  targetHumMax    Float  @map("target_hum_max")
+
+  truck    Truck     @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  readings Reading[]
+  alerts   Alert[]
+
+  @@map("boxes")
+}
+
+// A planned/active route for a truck
+model Route {
+  id              Int          @id @default(autoincrement())
+  truckId         Int          @map("truck_id")
+  originName      String       @map("origin_name")
+  destinationName String       @map("destination_name")
+  status          RouteStatus  @default(PENDING)
+  // Array of [lat, lng] coordinates (waypoints to interpolate)
+  waypoints       Json
+  startedAt       DateTime?    @map("started_at")
+  finishedAt      DateTime?    @map("finished_at")
+
+  truck Truck @relation(fields: [truckId], references: [id], onDelete: Cascade)
+
+  @@map("routes")
+}
+
+enum RouteStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+}
+
+// GPS tracking points (history of where the truck has been)
+model Position {
+  id         Int      @id @default(autoincrement())
+  truckId    Int      @map("truck_id")
+  lat        Float
+  lng        Float
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  truck Truck @relation(fields: [truckId], references: [id], onDelete: Cascade)
+
+  @@index([truckId, recordedAt])
+  @@map("positions")
+}
+
+// Sensor reading from a box
+model Reading {
+  id          Int      @id @default(autoincrement())
+  boxId       Int      @map("box_id")
+  temperature Float
+  humidity    Float
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+
+  @@index([boxId, recordedAt])
+  @@map("readings")
+}
+
+// Alert raised when a reading is out of range
+model Alert {
+  id           Int           @id @default(autoincrement())
+  boxId        Int           @map("box_id")
+  type         AlertType
+  severity     AlertSeverity @default(WARNING)
+  message      String
+  acknowledged Boolean       @default(false)
+  recordedAt   DateTime      @default(now()) @map("recorded_at")
+
+  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+enum AlertType {
+  TEMP
+  HUM
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}

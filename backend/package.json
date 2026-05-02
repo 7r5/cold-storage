@@ -1,0 +1,32 @@
+{
+  "name": "cold-chain-control-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cold Chain Control - REST + WebSocket API",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "prisma": "^5.22.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["<rootDir>/tests/**/*.test.js"]
+  }
+}
