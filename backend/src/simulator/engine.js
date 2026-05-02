@@ -7,7 +7,7 @@
 const prisma = require('../db');
 
 // Tunables
-const TICK_MS = 2000;            // emit positions/readings every 2s
+const TICK_MS = 5000;            // emit positions/readings every 5s
 const ROUTE_DURATION_MS = 60_000; // 60s to traverse a route (demo speed)
 
 // State per trucking session
