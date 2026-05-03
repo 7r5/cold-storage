@@ -51,9 +51,9 @@ services:
     plan: free
     rootDir: backend
     # Forzamos la reinstalación y generación limpia
-    buildCommand: npm install && npx prisma generate
+    npm install && npx prisma generate --schema=./prisma/schema.prisma
     # Añadimos --browser none y el hostname correcto
-    startCommand: npx prisma studio --browser none --port $PORT --hostname 0.0.0.0
+    startCommand: npx prisma studio --browser none --port $PORT --hostname 0.0.0.0 --schema ./prisma/schema.prisma
     envVars:
       - key: DATABASE_URL
         fromDatabase:
