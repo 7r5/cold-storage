@@ -50,11 +50,9 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    # Solo generamos el cliente de prisma, no necesitamos hacer push ni seed aquí
     buildCommand: npm install && npx prisma generate
-    # --browser none para que no intente abrir una ventana en el servidor
-    # --port $PORT para que Render pueda exponer el servicio
-    startCommand: npx prisma studio --browser none --port $PORT
+    # CAMBIO AQUÍ: Agregamos --host 0.0.0.0
+    startCommand: npx prisma studio --browser none --port $PORT --host 0.0.0.0
     envVars:
       - key: DATABASE_URL
         fromDatabase:
