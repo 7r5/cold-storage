@@ -6,21 +6,21 @@ const prisma = new PrismaClient();
 async function main() {
   // Users
   await prisma.user.upsert({
-    where: { username: 'admin' },
+    where: { username: 'max' },
     update: {},
-    create: { username: 'admin', password: 'admin', role: 'USER' },
+    create: { username: 'max', password: 'max', role: 'USER' },
   });
   await prisma.user.upsert({
-    where: { username: 'root' },
+    where: { username: 'yahel' },
     update: {},
-    create: { username: 'root', password: 'root', role: 'ROOT' },
+    create: { username: 'yahel', password: 'yahel', role: 'ROOT' },
   });
 
   // Trucks
   const trucksData = [
-    { plate: 'ABC-123', model: 'Volvo FH16', driverName: 'Juan Pérez' },
-    { plate: 'XYZ-789', model: 'Scania R450', driverName: 'María López' },
-    { plate: 'JKL-456', model: 'Mercedes Actros', driverName: 'Carlos Ruiz' },
+    { plate: 'UKG-001', model: 'Volvo FH16', driverName: 'Pepe Papas.' },
+    { plate: 'ADF-002', model: 'Scania R450', driverName: 'Ricardo A.' },
+    { plate: 'JFK-003', model: 'Mercedes Actros', driverName: 'Andres B.' },
   ];
 
   const trucks = [];

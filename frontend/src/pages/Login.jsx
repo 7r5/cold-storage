@@ -71,7 +71,7 @@ export default function Login() {
         </button>
 
         <p className="text-xs text-center text-slate-400">
-          Demo: <code>admin / admin</code> &middot; <code>root / root</code>
+          v0.0.3 &middot; 2026 todos los derechos reservados, se prohibe su uso comercial sin autorización expresa de los desarrolladores, amen.
         </p>
       </form>
     </div>
