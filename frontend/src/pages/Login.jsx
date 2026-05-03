@@ -1,19 +1,19 @@
 // Login page (UI in Spanish)
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
     try {
       await login(username, password);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     } catch {
       // error is already exposed via context
     }
@@ -27,12 +27,23 @@ export default function Login() {
         aria-label="Formulario de inicio de sesión"
       >
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-slate-800">Cold Chain Control</h1>
-          <p className="text-sm text-slate-500 mt-1">Inicia sesión para continuar</p>
+          {/* Imagen desde carpeta public */}
+          <img
+            src="/logo.jpeg"
+            alt="Logo Cold Chain Control"
+            className="mx-auto mt-3 max-w-xs h-auto"
+          />
+
+          <p className="text-sm text-slate-500 mt-1">
+            Inicia sesión para continuar
+          </p>
         </div>
 
         <div>
-          <label htmlFor="username" className="block text-sm text-slate-700 mb-1">
+          <label
+            htmlFor="username"
+            className="block text-sm text-slate-700 mb-1"
+          >
             Usuario
           </label>
           <input
@@ -46,7 +57,10 @@ export default function Login() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm text-slate-700 mb-1">
+          <label
+            htmlFor="password"
+            className="block text-sm text-slate-700 mb-1"
+          >
             Contraseña
           </label>
           <input
@@ -67,11 +81,12 @@ export default function Login() {
         )}
 
         <button type="submit" className="btn-primary w-full" disabled={loading}>
-          {loading ? 'Entrando…' : 'Entrar'}
+          {loading ? "Entrando…" : "Entrar"}
         </button>
 
         <p className="text-xs text-center text-slate-400">
-          v0.0.3 &middot; 2026 todos los derechos reservados, se prohibe su uso comercial sin autorización expresa de los desarrolladores, amen.
+          v0.0.3 &middot; 2026 todos los derechos reservados, se prohibe su uso
+          comercial sin autorización expresa de los desarrolladores, amen.
         </p>
       </form>
     </div>
