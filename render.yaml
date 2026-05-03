@@ -1,6 +1,4 @@
-# Render Blueprint: deploys the API (Node web service) and the
-# Web (static site) as independent services + a free PostgreSQL.
-#
+# Render Blueprint: deploys the API, the Web (static site) and Prisma Studio
 # Docs: https://render.com/docs/blueprint-spec
 
 databases:
@@ -29,7 +27,7 @@ services:
           name: cold-chain-control-db
           property: connectionString
       - key: CORS_ORIGIN
-        sync: false # set to the static site URL after first deploy
+        sync: false
 
   # Frontend (Vite static build)
   - type: web
@@ -40,8 +38,25 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        sync: false # set to the API service public URL
+        sync: false
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  # Prisma Studio (Explorador de Base de Datos)
+  - type: web
+    name: cold-chain-control-studio
+    runtime: node
+    plan: free
+    rootDir: backend
+    # Solo generamos el cliente de prisma, no necesitamos hacer push ni seed aquí
+    buildCommand: npm install && npx prisma generate
+    # --browser none para que no intente abrir una ventana en el servidor
+    # --port $PORT para que Render pueda exponer el servicio
+    startCommand: npx prisma studio --browser none --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cold-chain-control-db
+          property: connectionString
