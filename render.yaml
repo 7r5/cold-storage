@@ -44,15 +44,16 @@ services:
         source: /*
         destination: /index.html
 
-  # Prisma Studio (Explorador de Base de Datos)
+# Prisma Studio (Explorador de Base de Datos)
   - type: web
     name: cold-chain-control-studio
     runtime: node
     plan: free
     rootDir: backend
+    # Forzamos la reinstalación y generación limpia
     buildCommand: npm install && npx prisma generate
-    # CAMBIO AQUÍ: Agregamos --host 0.0.0.0
-    startCommand: npx prisma studio --browser none --port $PORT --hostname 0.0.0.0 --schema ./prisma/schema.prisma
+    # Añadimos --browser none y el hostname correcto
+    startCommand: npx prisma studio --browser none --port $PORT --hostname 0.0.0.0
     envVars:
       - key: DATABASE_URL
         fromDatabase:

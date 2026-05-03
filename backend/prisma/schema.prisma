@@ -2,7 +2,8 @@
 // Run: npx prisma db push  (pushes schema to DB without migrations)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
