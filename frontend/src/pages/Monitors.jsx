@@ -95,7 +95,7 @@ export default function Monitors() {
     };
   }, []);
 
-  const defaultCenter = [19.4326, -99.1332];
+  const defaultCenter = [20.5879069,-100.3927639];
 
   return (
     <div className="flex flex-col gap-4 pb-20"> {/* pb-20 evita que el contenido choque con menús inferiores */}
@@ -120,7 +120,7 @@ export default function Monitors() {
 
       {/* Mapa con altura controlada */}
       <section className="relative z-10 mx-1 border rounded-xl overflow-hidden shadow-inner bg-slate-100 h-72 md:h-80">
-        <MapContainer center={defaultCenter} zoom={11} className="h-full w-full">
+        <MapContainer center={defaultCenter} zoom={12} className="h-full w-full">
           <TileLayer
             attribution='&copy; OpenStreetMap'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
