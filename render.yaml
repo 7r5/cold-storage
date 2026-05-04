@@ -59,6 +59,6 @@ services:
           name: cold-chain-control-db
           property: connectionString
       - key: PRISMA_CLI_QUERY_ENGINE_TYPE
-        value: library
+        value: binary
       - key: PRISMA_CLIENT_ENGINE_TYPE
-        value: library
+        value: binary
