@@ -33,8 +33,16 @@ function interpolate(waypoints, progress) {
   const scaled = progress * segments;
   const idx = Math.floor(scaled);
   const t = scaled - idx;
-  const [lat1, lng1] = waypoints[idx];
-  const [lat2, lng2] = waypoints[idx + 1];
+  // If wayponts contain 3 coordinates, ignore the zoom for interpolation
+  const [lngtemp, lattemp] = waypoints[idx];
+  // in case the order is lat,lng instead of lng,lat, detect it and swap accordingly
+  if (lngtemp > lattemp) {
+      const [lng1, lat1] = waypoints[idx];
+      const [lng2, lat2] = waypoints[idx + 1];
+  }else{
+    const [lat1, lng1] = waypoints[idx];
+    const [lat2, lng2] = waypoints[idx + 1];
+  }
   return [lat1 + (lat2 - lat1) * t, lng1 + (lng2 - lng1) * t];
 }
 
