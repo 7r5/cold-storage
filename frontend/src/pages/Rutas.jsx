@@ -1,6 +1,6 @@
 // Route list page — view, create, and delete planned routes
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 const STATUS_LABEL = {
@@ -16,6 +16,7 @@ const STATUS_COLOR = {
 };
 
 export default function Rutas() {
+  const navigate = useNavigate();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
@@ -50,7 +51,13 @@ export default function Rutas() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-base font-semibold text-slate-800">Rutas</h1>
+        <button onClick={() => navigate(-1)} aria-label="Volver" className="flex items-center gap-2 text-slate-500 hover:text-slate-800">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+          <span className="text-base font-semibold text-slate-800">Rutas</span>
+        </button>
         <Link to="/rutas/nueva" className="btn-primary text-sm">+ Nueva ruta</Link>
       </div>
 

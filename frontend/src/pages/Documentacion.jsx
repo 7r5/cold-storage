@@ -53,13 +53,13 @@ export default function Documentacion() {
   return (
     <div className="space-y-4 pb-4">
       <div className="flex items-center gap-2">
-        <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-slate-800">
+        <button onClick={() => navigate(-1)} aria-label="Volver" className="flex items-center gap-2 text-slate-500 hover:text-slate-800">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M15 18l-6-6 6-6"/>
           </svg>
+          <span className="text-base font-semibold text-slate-800">Documentación</span>
         </button>
-        <h1 className="text-base font-semibold text-slate-800">Documentación</h1>
       </div>
 
       {/* Overview */}
