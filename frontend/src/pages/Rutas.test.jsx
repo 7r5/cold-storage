@@ -92,4 +92,63 @@ describe('Rutas page', () => {
     setup();
     expect(await screen.findByText(/no se pudieron cargar/i)).toBeInTheDocument();
   });
+
+  it('does NOT delete when confirm is cancelled', async () => {
+    window.confirm.mockReturnValue(false);
+    api.get.mockResolvedValue([
+      {
+        id: 1, status: 'PENDING',
+        originName: 'Ori', destinationName: 'Dst',
+        truck: { id: 1, plate: 'UKG-001' },
+      },
+    ]);
+    const user = userEvent.setup();
+    setup();
+    const deleteBtn = await screen.findByRole('button', { name: /eliminar/i });
+    await user.click(deleteBtn);
+    expect(api.delete).not.toHaveBeenCalled();
+  });
+
+  it('shows truck id fallback when truck is null', async () => {
+    api.get.mockResolvedValue([
+      {
+        id: 2, status: 'ACTIVE',
+        originName: 'X', destinationName: 'Y',
+        truckId: 42,
+        truck: null,
+        waypoints: [],
+      },
+    ]);
+    setup();
+    expect(await screen.findByText(/camión #42/i)).toBeInTheDocument();
+  });
+
+  it('shows COMPLETED badge', async () => {
+    api.get.mockResolvedValue([
+      {
+        id: 3, status: 'COMPLETED',
+        originName: 'P', destinationName: 'Q',
+        truck: { id: 1, plate: 'ADF-002' },
+      },
+    ]);
+    setup();
+    expect(await screen.findByText('Completada')).toBeInTheDocument();
+  });
+
+  it('shows error when delete fails', async () => {
+    window.alert = jest.fn();
+    api.get.mockResolvedValue([
+      {
+        id: 1, status: 'PENDING',
+        originName: 'Ori', destinationName: 'Dst',
+        truck: { id: 1, plate: 'UKG-001' },
+      },
+    ]);
+    api.delete.mockRejectedValue(new Error('Server error'));
+    const user = userEvent.setup();
+    setup();
+    const deleteBtn = await screen.findByRole('button', { name: /eliminar/i });
+    await user.click(deleteBtn);
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith('Server error'));
+  });
 });

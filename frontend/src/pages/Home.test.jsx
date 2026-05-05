@@ -59,4 +59,14 @@ describe('Home page', () => {
     const link = await screen.findByText('UKG-001');
     expect(link.closest('a')).toHaveAttribute('href', '/camiones/1');
   });
+
+  it('shows Mantenimiento badge for MAINTENANCE truck', async () => {
+    api.get
+      .mockResolvedValueOnce([
+        { id: 3, plate: 'JFK-003', model: 'Mercedes', driverName: 'Ana', status: 'MAINTENANCE' },
+      ])
+      .mockResolvedValueOnce([]);
+    setup();
+    expect(await screen.findByText('Mantenimiento')).toBeInTheDocument();
+  });
 });

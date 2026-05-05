@@ -75,9 +75,18 @@ description: "Guidelines for the Cold Chain Control web app (React + Vite + Tail
 - Inputs need associated `<label>` (Spanish text).
 - Icons-only buttons need `aria-label` (in Spanish).
 
+## README
+- **Whenever new pages, components, or significant features are generated, update `README.md` in the same response**: document the new screen/component, update the changelog, and keep the credentials/command sections in sync with reality.
+
 ## Tests (Jest + Testing Library)
-- New page or non-trivial component requires a test in `src/__tests__/`.
+- **Every time a new page, component, hook, or utility is generated, write the corresponding tests in the same response. Do not defer tests to a follow-up step.**
+- Place test files next to the source file or in `src/__tests__/` for pages. Use the pattern `*.test.jsx` (or `*.test.js` for plain JS).
 - Query by accessible role/label/text (Spanish). Avoid `getByTestId` unless nothing else works.
+- Mock `src/api/client.js` with `jest.mock('../api/client', () => ({ default: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() } }))` — never hit the real API in tests.
+- Mock `src/api/socket.js` with `jest.mock('../api/socket', () => ({ getSocket: () => ({ on: jest.fn(), off: jest.fn() }) }))` when the component subscribes to socket events.
+- Cover at minimum: renders without crashing, happy-path data display, loading state, empty/error state, and key user interactions (clicks, form submits).
+- **Minimum coverage target: 90%** (lines, statements, functions & branches) on changed files. Do not introduce new files that drop overall coverage below the project threshold.
+- After writing tests, confirm they pass by running `npm test -- --forceExit` and include the result summary in the response.
 - Use `userEvent` over `fireEvent` for interactions.
 - Mock `src/api/client.js` and `src/api/socket.js` — never hit a real backend in tests.
 - Wrap components that use routing/context with the matching providers (see existing `Login.test.jsx`, `BottomNav.test.jsx`).

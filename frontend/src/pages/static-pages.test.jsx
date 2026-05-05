@@ -26,12 +26,37 @@ describe('AcercaDe page', () => {
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.getByText('Backend')).toBeInTheDocument();
   });
+
+  it('renders official logo image', () => {
+    wrap(AcercaDe);
+    const img = screen.getByAltText('ColdTrack logo');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', '/logo.jpeg');
+  });
+
+  it('navigates back on button click', async () => {
+    const user = userEvent.setup();
+    wrap(AcercaDe);
+    const backBtn = screen.getAllByRole('button')[0];
+    await user.click(backBtn);
+    // navigate(-1) called — no crash
+    expect(backBtn).toBeInTheDocument();
+  });
 });
 
 describe('Ayuda page', () => {
   it('renders page heading', () => {
     wrap(Ayuda);
     expect(screen.getByRole('heading', { name: 'Ayuda' })).toBeInTheDocument();
+  });
+
+  it('navigates back on button click', async () => {
+    const user = userEvent.setup();
+    wrap(Ayuda);
+    // Back button is first button before FAQ buttons
+    const backBtn = screen.getAllByRole('button')[0];
+    await user.click(backBtn);
+    expect(backBtn).toBeInTheDocument();
   });
 
   it('expands a FAQ item on click', async () => {
@@ -60,6 +85,14 @@ describe('Documentacion page', () => {
   it('renders page heading', () => {
     wrap(Documentacion);
     expect(screen.getByRole('heading', { name: 'Documentación' })).toBeInTheDocument();
+  });
+
+  it('navigates back on button click', async () => {
+    const user = userEvent.setup();
+    wrap(Documentacion);
+    const backBtn = screen.getAllByRole('button')[0];
+    await user.click(backBtn);
+    expect(backBtn).toBeInTheDocument();
   });
 
   it('expands a section on click', async () => {

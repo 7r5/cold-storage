@@ -64,4 +64,12 @@ describe('Alerts page', () => {
     setup();
     expect(await screen.findByText(/humedad · low/i)).toBeInTheDocument();
   });
+
+  it('shows boxId when box property is absent', async () => {
+    api.get.mockResolvedValue([
+      { id: 4, type: 'TEMP', severity: 'WARNING', message: 'Sensor offline', boxId: 99 },
+    ]);
+    setup();
+    expect(await screen.findByText(/caja 99/i)).toBeInTheDocument();
+  });
 });

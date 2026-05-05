@@ -38,9 +38,11 @@ model Truck {
   plate      String       @unique
   model      String
   driverName String       @map("driver_name")
+  driverId   Int?         @map("driver_id")
   status     TruckStatus  @default(IDLE)
   createdAt  DateTime     @default(now()) @map("created_at")
 
+  driver    Driver?    @relation(fields: [driverId], references: [id], onDelete: SetNull)
   boxes     Box[]
   routes    Route[]
   positions Position[]
@@ -237,4 +239,30 @@ enum BugStatus {
   OPEN
   IN_PROGRESS
   CLOSED
+}
+
+// Professional driver assigned to a truck
+model Driver {
+  id            Int      @id @default(autoincrement())
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  licenseNumber String   @unique @map("license_number")
+  phone         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  trucks Truck[]
+
+  @@map("drivers")
+}
+
+// FAQ entry displayed in the Ayuda (Help) page
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String   @db.Text
+  category  String?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("faqs")
 }

@@ -115,4 +115,36 @@ describe('Bugs page', () => {
       expect(screen.getByText('No hay bugs reportados.')).toBeInTheDocument(),
     );
   });
+
+  it('shows form error when submit fails', async () => {
+    api.get.mockResolvedValue([]);
+    api.post.mockRejectedValue(new Error('Error de red'));
+    const user = userEvent.setup();
+    setup();
+    await user.click(screen.getByText('+ Reportar bug'));
+    await user.type(screen.getByPlaceholderText(/mapa se queda/i), 'Crash');
+    await user.selectOptions(screen.getByRole('combobox'), 'Inicio');
+    await user.type(screen.getByPlaceholderText(/qué debería pasar/i), 'OK');
+    await user.type(screen.getByPlaceholderText(/qué pasó en realidad/i), 'Error');
+    await user.click(screen.getByRole('button', { name: /enviar reporte/i }));
+    expect(await screen.findByText('Error de red')).toBeInTheDocument();
+  });
+
+  it('shows closed bugs section', async () => {
+    const closedBug = {
+      id: 2, title: 'Bug cerrado', location: 'Home',
+      expected: 'x', actual: 'y', status: 'CLOSED',
+      reportedBy: null, createdAt: '2025-02-01T00:00:00.000Z',
+    };
+    api.get.mockResolvedValue([...mockBugs, closedBug]);
+    setup();
+    expect(await screen.findByText('Cerrados')).toBeInTheDocument();
+    expect(screen.getByText('Bug cerrado')).toBeInTheDocument();
+  });
+
+  it('shows singular abierto badge when exactly one open bug', async () => {
+    api.get.mockResolvedValue([mockBugs[0]]);
+    setup();
+    expect(await screen.findByText('1 abierto')).toBeInTheDocument();
+  });
 });

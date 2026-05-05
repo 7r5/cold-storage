@@ -29,10 +29,7 @@ export default function AcercaDe() {
 
       {/* App identity */}
       <div className="card flex flex-col items-center gap-2 py-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-brand-600 flex items-center justify-center text-3xl" aria-hidden>
-          🧊
-        </div>
-        <p className="text-lg font-bold text-slate-800">Cold Chain Control</p>
+        <img src="/logo.jpeg" alt="ColdTrack logo" className="w-40 h-auto" />
         <p className="text-xs text-slate-500">Versión 0.1.0-poc</p>
         <span className="text-xs bg-yellow-100 text-yellow-700 font-medium px-2 py-0.5 rounded-full">
           Proof of Concept

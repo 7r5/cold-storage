@@ -55,19 +55,27 @@ async function main() {
 
   // Trucks
   const trucksData = [
-    { plate: "UKG-001", model: "Volvo FH16",        driverName: "Pepe Papas.",  boxes: 1 },
-    { plate: "ADF-002", model: "Scania R450",        driverName: "Ricardo A.",  boxes: 1 },
-    { plate: "JFK-003", model: "Mercedes Actros",    driverName: "Andres B.",   boxes: 2 },
+    { plate: "UKG-001", model: "Volvo FH16",        driverName: "Pepe Papas.",  boxes: 1, licenseNumber: "LIC-001", driverFirst: "José",     driverLast: "Papas Ríos",    driverPhone: "+52 442 300 1001" },
+    { plate: "ADF-002", model: "Scania R450",        driverName: "Ricardo A.",  boxes: 1, licenseNumber: "LIC-002", driverFirst: "Ricardo",   driverLast: "Arreola",        driverPhone: "+52 442 300 1002" },
+    { plate: "JFK-003", model: "Mercedes Actros",    driverName: "Andres B.",   boxes: 2, licenseNumber: "LIC-003", driverFirst: "Andrés",    driverLast: "Becerra Soto",   driverPhone: "+52 442 300 1003" },
   ];
 
   const trucks = [];
   for (const t of trucksData) {
-    const { boxes: boxCount, ...truckFields } = t;
+    const { boxes: boxCount, licenseNumber, driverFirst, driverLast, driverPhone, ...truckFields } = t;
+
+    // Upsert driver
+    const driver = await prisma.driver.upsert({
+      where: { licenseNumber },
+      update: {},
+      create: { firstName: driverFirst, lastName: driverLast, licenseNumber, phone: driverPhone },
+    });
+
     trucks.push(
       await prisma.truck.upsert({
         where: { plate: truckFields.plate },
-        update: {},
-        create: truckFields,
+        update: { driverId: driver.id },
+        create: { ...truckFields, driverId: driver.id },
       }),
     );
     trucks[trucks.length - 1]._boxCount = boxCount;
@@ -213,6 +221,22 @@ async function main() {
         message: "Temperatura por encima del rango (-17.2 °C)",
       },
     });
+  }
+
+  // FAQs
+  const faqsData = [
+    { question: "¿Cómo inicio una simulación de ruta?",          answer: "Ve a "Más → Panel de simulación" (solo administradores), selecciona una ruta de la lista y presiona "Simular ruta". La posición del camión se actualizará en tiempo real en la pantalla de Monitores.",                                                                                            category: "Simulación",  sortOrder: 1 },
+    { question: "¿Qué significan las alertas de temperatura?",   answer: "Cada caja tiene un rango de temperatura objetivo. Cuando el sensor detecta una lectura fuera de ese rango, se genera una alerta de tipo TEMP con severidad WARNING o CRITICAL.",                                                                                                                      category: "Alertas",     sortOrder: 2 },
+    { question: "¿Cómo creo una nueva ruta?",                    answer: "Ve a "Más → Rutas → Nueva ruta". Escribe el nombre del origen y destino, presiona "Calcular ruta por carretera" y luego guárdala asignándola a un camión.",                                                                                                                                            category: "Rutas",       sortOrder: 3 },
+    { question: "¿Qué es una 'caja' (box)?",                    answer: "Una caja es el contenedor refrigerado montado sobre el camión donde viajan los productos farmacéuticos. Cada caja tiene sensores de temperatura y humedad.",                                                                                                                                              category: "Inventario",  sortOrder: 4 },
+    { question: "¿Puedo simular varias rutas al mismo tiempo?",  answer: "Sí. El simulador puede correr múltiples rutas en paralelo. Cada una se muestra como una polilínea independiente en el mapa de Monitores.",                                                                                                                                                              category: "Simulación",  sortOrder: 5 },
+    { question: "¿Los datos son reales?",                        answer: "No. Esta es una aplicación de demostración (POC). Las posiciones GPS, lecturas de sensores y alertas son generadas por un simulador. No hay hardware real conectado.",                                                                                                                                    category: "General",     sortOrder: 6 },
+    { question: "¿Qué es una sucursal (branch)?",               answer: "Una sucursal representa un punto físico de la cadena de frío: almacén, farmacia, hospital o centro de distribución.",                                                                                                                                                                                    category: "Inventario",  sortOrder: 7 },
+    { question: "¿Cómo se reconoce una alerta?",                 answer: "En la pantalla de Alertas, presiona el botón "Reconocer" junto a la alerta. Esto la marca como resuelta y deja de aparecer en los contadores activos.",                                                                                                                                                  category: "Alertas",     sortOrder: 8 },
+  ];
+  const existingFaqCount = await prisma.faq.count();
+  if (existingFaqCount === 0) {
+    await prisma.faq.createMany({ data: faqsData });
   }
 
   console.log("Seed completed.");

@@ -72,12 +72,16 @@ Even though all data is dummy, ask the user before modifying:
 - The simulator (`src/simulator/engine.js`) is the single source of truth for synthetic readings/positions. Don't generate readings from route handlers.
 - Emit events with stable, documented names; payloads in `camelCase`. When changing an event, update the frontend `src/api/socket.js` in the same change.
 
+## README
+- **Whenever new routes, models, or significant features are generated, update `README.md` in the same response**: add the new entity to the data model table, document any new endpoints or commands, and append a `Changelog` entry with the date.
+
 ## Tests (Jest + Supertest)
-- New routes/middleware/utilities require tests in `backend/tests/`.
+- **Every time new code is generated — a route, middleware, utility, or Prisma helper — write the corresponding tests in `backend/tests/` in the same response. Do not defer tests to a follow-up step.**
 - Use `createApp()` + `supertest(app)` — do not bind a real port in tests.
 - Keep tests deterministic: mock `Date.now` / timers when asserting on the simulator engine; mock Prisma client when asserting on routes (no real DB in unit tests).
 - Cover at minimum: happy path, auth failure (401), validation failure (400), not-found (404).
-- **Minimum coverage target: 70%** (lines & branches) on changed files. Don't lower the bar to make a PR pass.
+- **Minimum coverage target: 90%** (lines, statements, functions & branches) on changed files. Don't lower the bar to make a PR pass.
+- After writing tests, confirm they pass by running `npm test --runInBand` and include the result summary in the response.
 - Run with `npm test` from `backend/`. Tests must pass before considering a change done.
 
 ## When adding a feature, the checklist is

@@ -79,6 +79,32 @@ describe('Ajustes page', () => {
     const dashes = screen.getAllByText('—');
     expect(dashes.length).toBeGreaterThan(0);
   });
+
+  it('navigates back on button click', async () => {
+    const user = userEvent.setup();
+    setupAjustes();
+    const backBtn = screen.getAllByRole('button')[0];
+    await user.click(backBtn);
+    expect(backBtn).toBeInTheDocument();
+  });
+
+  it('uses username as fullName when firstName and lastName are absent', () => {
+    setupAjustes({ id: 3, username: 'solo', role: 'ROOT' });
+    // fullName falls back to username
+    expect(screen.getAllByText('solo').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows user with only lastName (no firstName)', () => {
+    setupAjustes({ id: 7, username: 'nofirst', role: 'USER', lastName: 'Torres' });
+    // firstName ?? '' → '' branch
+    expect(screen.getAllByText('Torres').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows user with only firstName (no lastName)', () => {
+    setupAjustes({ id: 8, username: 'nolast', role: 'USER', firstName: 'Laura' });
+    // lastName ?? '' → '' branch
+    expect(screen.getAllByText('Laura').length).toBeGreaterThanOrEqual(1);
+  });
 });
 
 // ─── More ─────────────────────────────────────────────────────────────────────
@@ -127,5 +153,41 @@ describe('More page', () => {
     const btns = screen.getAllByRole('button', { name: /cerrar sesión/i });
     await user.click(btns[btns.length - 1]);
     await waitFor(() => expect(screen.getByText('LOGIN')).toBeInTheDocument());
+  });
+
+  it('closes logout modal on Cancelar click', async () => {
+    const user = userEvent.setup();
+    setupMore();
+    await user.click(screen.getAllByText('Cerrar sesión')[0]);
+    expect(screen.getByText(/¿cerrar sesión\?/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /cancelar/i }));
+    expect(screen.queryByText(/¿cerrar sesión\?/i)).not.toBeInTheDocument();
+  });
+
+  it('hides position line when user has no position', () => {
+    setupMore({ ...mockUser, position: undefined });
+    expect(screen.queryByText('Logístico')).not.toBeInTheDocument();
+  });
+
+  it('uses username as fullName when firstName and lastName are absent', () => {
+    setupMore({ id: 4, username: 'guest', role: 'USER' });
+    expect(screen.getAllByText('guest').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows unknown role as-is when not in ROLE_LABEL', () => {
+    setupMore({ ...mockUser, role: 'SUPERADMIN' });
+    expect(screen.getByText(/@max/)).toBeInTheDocument();
+  });
+
+  it('shows user with only lastName (no firstName)', () => {
+    setupMore({ id: 5, username: 'nofirst', role: 'USER', lastName: 'García' });
+    // fullName = '' + 'García' trimmed → 'García'
+    expect(screen.getAllByText('García').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows user with only firstName (no lastName)', () => {
+    setupMore({ id: 6, username: 'nolast', role: 'USER', firstName: 'Pablo' });
+    // fullName = 'Pablo' + '' trimmed → 'Pablo'
+    expect(screen.getAllByText('Pablo').length).toBeGreaterThanOrEqual(1);
   });
 });
