@@ -126,6 +126,64 @@ async function main() {
     });
   }
 
+  // Branches (Querétaro)
+  const branchesData = [
+    { name: "CEDIS Querétaro Norte",     city: "Querétaro", address: "Blvd. Bernardo Quintana 2001, Col. Prados del Milenio", type: "DISTRIBUTION_CENTER" },
+    { name: "Farmacia Central Corregidora", city: "Querétaro", address: "Av. Corregidora Norte 155, Col. Centro Histórico", type: "PHARMACY" },
+    { name: "Hospital Star Médica Querétaro", city: "Querétaro", address: "Av. 5 de Febrero 1703, Col. Prados del Parque", type: "HOSPITAL" },
+    { name: "Almacén Frío San Juan del Río", city: "San Juan del Río", address: "Carretera 57 Km 168, Parque Industrial", type: "WAREHOUSE" },
+  ];
+  const branches = [];
+  for (const b of branchesData) {
+    const existing = await prisma.branch.findFirst({ where: { name: b.name } });
+    if (existing) { branches.push(existing); continue; }
+    branches.push(await prisma.branch.create({ data: b }));
+  }
+
+  // Products (pharmaceutical)
+  const productsData = [
+    { sku: "VAC-COVID-001",  name: "Vacuna COVID-19 (ARNm)",       category: "Vacunas",       description: "Conservar entre -80 °C y -60 °C" },
+    { sku: "INS-GLAR-001",   name: "Insulina Glargina 100 UI/mL",  category: "Insulinas",     description: "Conservar entre 2 °C y 8 °C" },
+    { sku: "VAC-INFLU-001",  name: "Vacuna Influenza Trivalente",  category: "Vacunas",       description: "Conservar entre 2 °C y 8 °C" },
+    { sku: "BIO-TRAS-001",   name: "Trastuzumab 440 mg",           category: "Biológicos",    description: "Refrigerado 2–8 °C, no congelar" },
+    { sku: "INS-ASPART-001", name: "Insulina Aspart 100 UI/mL",    category: "Insulinas",     description: "Conservar entre 2 °C y 8 °C" },
+    { sku: "BIO-BEVA-001",   name: "Bevacizumab 400 mg/16 mL",     category: "Biológicos",    description: "Refrigerado 2–8 °C, no agitar" },
+    { sku: "VAC-NEUM-001",   name: "Vacuna Neumocócica 13v",       category: "Vacunas",       description: "Conservar entre 2 °C y 8 °C" },
+    { sku: "HOR-EPO-001",    name: "Eritropoyetina 4000 UI",       category: "Hormonas",      description: "Refrigerado, proteger de la luz" },
+    { sku: "BIO-ADAL-001",   name: "Adalimumab 40 mg/0.8 mL",     category: "Biológicos",    description: "Refrigerado 2–8 °C" },
+    { sku: "VAC-ROTA-001",   name: "Vacuna Rotavirus (pentav.)",   category: "Vacunas",       description: "Conservar entre 2 °C y 8 °C, no congelar" },
+  ];
+  const products = [];
+  for (const p of productsData) {
+    const existing = await prisma.product.findUnique({ where: { sku: p.sku } });
+    if (existing) { products.push(existing); continue; }
+    products.push(await prisma.product.create({ data: p }));
+  }
+
+  // Assign loads to the first route (if it exists and has no loads yet)
+  const seedRoute = await prisma.route.findFirst({ where: { truckId: trucks[0].id } });
+  if (seedRoute) {
+    const existingLoads = await prisma.boxLoad.count({ where: { routeId: seedRoute.id } });
+    if (existingLoads === 0) {
+      // boxes[0] → first 5 products, boxes[1] → next 5 products
+      const loadsData = [
+        { boxId: boxes[0].id, productId: products[0].id, quantity: 200, unit: "dosis" },
+        { boxId: boxes[0].id, productId: products[1].id, quantity: 50,  unit: "viales" },
+        { boxId: boxes[0].id, productId: products[2].id, quantity: 300, unit: "dosis" },
+        { boxId: boxes[0].id, productId: products[3].id, quantity: 10,  unit: "viales" },
+        { boxId: boxes[0].id, productId: products[4].id, quantity: 80,  unit: "viales" },
+        { boxId: boxes[1].id, productId: products[5].id, quantity: 6,   unit: "viales" },
+        { boxId: boxes[1].id, productId: products[6].id, quantity: 400, unit: "dosis" },
+        { boxId: boxes[1].id, productId: products[7].id, quantity: 120, unit: "jeringas" },
+        { boxId: boxes[1].id, productId: products[8].id, quantity: 24,  unit: "plumas" },
+        { boxId: boxes[1].id, productId: products[9].id, quantity: 500, unit: "dosis" },
+      ];
+      for (const ld of loadsData) {
+        await prisma.boxLoad.create({ data: { ...ld, routeId: seedRoute.id } });
+      }
+    }
+  }
+
   // A few historical readings per box (just to have data on the dashboard)
   for (const b of boxes) {
     const count = await prisma.reading.count({ where: { boxId: b.id } });
