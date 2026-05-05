@@ -49,10 +49,27 @@ router.get('/live-history', async (_req, res) => {
 router.get('/', async (_req, res) => {
   try {
     const routes = await prisma.route.findMany({
-      include: { 
-        truck: { 
-          select: { id: true, plate: true } 
-        } 
+      include: {
+        truck: {
+          select: {
+            id: true,
+            plate: true,
+            boxes: {
+              select: {
+                id: true,
+                code: true,
+                targetTempMin: true,
+                targetTempMax: true,
+                targetHumMin: true,
+                targetHumMax: true,
+                alerts: {
+                  where: { acknowledged: false },
+                  select: { id: true, type: true, severity: true, message: true },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: { id: 'asc' },
     });
