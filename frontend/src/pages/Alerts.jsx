@@ -10,7 +10,7 @@ const IX0 = PAD.left, IX1 = CW - PAD.right;
 const IY0 = PAD.top,  IY1 = CH - PAD.bottom;
 const ICW = IX1 - IX0, ICH = IY1 - IY0;
 
-function AlertBarChart({ data, color = '#ef4444' }) {
+function AlertBarChart({ data, color = '#2563eb' }) {
   if (!data || data.length === 0)
     return <p className="text-xs text-slate-300 text-center py-4">Sin datos</p>;
 
@@ -217,7 +217,7 @@ export default function Alerts() {
                   <p className="text-[10px] text-slate-400 uppercase font-bold mt-0.5">Total</p>
                 </div>
                 <div className="card text-center py-3">
-                  <p className="text-2xl font-black text-red-500">{tempCount}</p>
+                  <p className="text-2xl font-black text-violet-600">{tempCount}</p>
                   <p className="text-[10px] text-slate-400 uppercase font-bold mt-0.5">Temp</p>
                 </div>
                 <div className="card text-center py-3">
@@ -235,13 +235,13 @@ export default function Alerts() {
                   {/* By hour */}
                   <div className="card space-y-2">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Por hora del dia</p>
-                    <AlertBarChart data={hourData} color="#ef4444" />
+                    <AlertBarChart data={hourData} color="#2563eb" />
                   </div>
 
                   {/* By day of week */}
                   <div className="card space-y-2">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Por dia de la semana</p>
-                    <AlertBarChart data={dayData} color="#f97316" />
+                    <AlertBarChart data={dayData} color="#0891b2" />
                   </div>
 
                   {/* Recent list */}

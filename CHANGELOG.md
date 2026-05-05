@@ -15,6 +15,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ### Changed
 - Rangos de cajas actualizados en seed upsert (`-25`/`-13` °C · `58`/`82` % HR) — se aplican en cada deploy.
+- Alertas: gráficas de barras cambiadas a azul (`blue-600`/`cyan-600`); chip de conteo de temperatura usa `violet-600`. Rojo ahora reservado solo para severidad CRITICAL y badge de alertas activas.
 
 ---
 
