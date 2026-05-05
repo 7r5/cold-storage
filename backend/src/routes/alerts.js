@@ -4,13 +4,19 @@ const prisma = require('../db');
 
 const router = express.Router();
 
-// GET /api/alerts?onlyActive=true
+// GET /api/alerts?onlyActive=true&since=ISO&limit=N
 router.get('/', async (req, res) => {
   const onlyActive = req.query.onlyActive === 'true';
+  const since = req.query.since ? new Date(req.query.since) : undefined;
+  const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
   const alerts = await prisma.alert.findMany({
-    where: onlyActive ? { acknowledged: false } : undefined,
+    where: {
+      ...(onlyActive ? { acknowledged: false } : {}),
+      ...(since ? { recordedAt: { gte: since } } : {}),
+    },
     include: { box: { select: { id: true, code: true, truckId: true } } },
     orderBy: { recordedAt: 'desc' },
+    ...(limit ? { take: limit } : {}),
   });
   res.json(alerts);
 });
