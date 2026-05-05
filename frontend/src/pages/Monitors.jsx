@@ -73,9 +73,10 @@ export default function Monitors() {
         setRoutes(routesData);
 
         const history = await api.get("/api/routes/live-history");
+        // history is keyed by routeId — set directly, no cleanup needed for zeros
         const cleanHistory = {};
-        Object.entries(history).forEach(([tid, points]) => {
-          cleanHistory[tid] = points.filter((p) => p[0] !== 0 && p[1] !== 0);
+        Object.entries(history).forEach(([rid, points]) => {
+          cleanHistory[rid] = points.filter((p) => p[0] !== 0 && p[1] !== 0);
         });
         setLiveRoutes(cleanHistory);
 
@@ -101,16 +102,17 @@ export default function Monitors() {
     // 2. Configuración de Socket
     const socket = getSocket();
 
-    const onPos = ({ truckId, lat, lng }) => {
+    const onPos = ({ routeId, lat, lng }) => {
       // Engine always emits { lat, lng } in [lat, lng] order (Leaflet-ready)
-      if (lat == null || lng == null) return;
+      // Keyed by routeId to prevent mixing points from different routes of the same truck
+      if (lat == null || lng == null || routeId == null) return;
 
       setLiveRoutes((prev) => {
-        const tid = String(truckId);
-        const current = prev[tid] || [];
+        const rid = String(routeId);
+        const current = prev[rid] || [];
         const last = current[current.length - 1];
         if (last && last[0] === lat && last[1] === lng) return prev;
-        return { ...prev, [tid]: [...current, [lat, lng]] };
+        return { ...prev, [rid]: [...current, [lat, lng]] };
       });
     };
 
@@ -180,7 +182,8 @@ export default function Monitors() {
           {routes.map((route) => {
             const truck = route.truck;
             const truckId = truck ? String(truck.id) : null;
-            const livePoints = truckId ? liveRoutes[truckId] || [] : [];
+            // Use routeId as key — prevents cross-route polyline contamination
+            const livePoints = liveRoutes[String(route.id)] || [];
             const color = truckId ? getTruckColor(truckId) : "#2c22f1";
 
             const showLive =
