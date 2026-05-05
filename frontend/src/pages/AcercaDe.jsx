@@ -1,4 +1,5 @@
 // About page
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const STACK = [
@@ -12,7 +13,115 @@ const STACK = [
   { layer: 'Ruteo', tech: 'OSRM (Project OSRM)' },
 ];
 
+const CHANGELOG = [
+  {
+    version: 'Unreleased',
+    date: '2026-05-04',
+    added: [
+      'PWA: manifest, service worker e íconos para instalación en Android/iOS.',
+      'Variación de temperatura por hora del día en el simulador (±5 °C, pico 14:00).',
+      'Botón de atrás de Android: navega en la app; doble pulsación en tabs raíz para salir.',
+      'Créditos "7r5 Studios" y link al repositorio en esta pantalla.',
+      'Botón de volver en página Rutas (faltaba).',
+    ],
+    fixed: [
+      'Botón de volver en páginas de Más: área clickeable incluye ícono y título.',
+    ],
+  },
+  {
+    version: '0.1.2',
+    date: '2026-05-04',
+    added: [
+      'GET /api/auth/me — perfil fresco al arrancar la app.',
+    ],
+    fixed: [
+      'Teléfono, edad y puesto no se mostraban en Ajustes por datos stale en localStorage.',
+    ],
+  },
+  {
+    version: '0.1.1',
+    date: '2026-05-04',
+    added: [
+      'Versión semver + git hash inyectada en build time (ej. 0.1.1+a525160).',
+      'Scripts de release: release:patch, release:minor, release:major.',
+      'Tarjetas de monitor ordenadas: Activa → Pendiente → Completada.',
+      'CameraLock: el mapa sigue al camión seleccionado sin cambiar el zoom.',
+      'Botón "Desbloquear cámara" para uso manual del mapa.',
+    ],
+    fixed: [
+      'Mapa mostraba ruta completa al reiniciar simulación (posiciones stale en DB y en cliente).',
+      'Ruta duplicada en cada deploy por originName inconsistente en seed.',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-05-04',
+    added: [
+      'API REST completa: auth, trucks, boxes, routes, simulator, alerts, inventory, bugs, FAQ.',
+      'Simulador en memoria con interpolación de waypoints, lecturas y alertas automáticas.',
+      'Todas las pantallas: Home, Monitores, Inventario, Alertas, Más, TruckDetail, Rutas, Ajustes, Ayuda, AcercaDe, Documentación, Bugs, Root.',
+      'Mapa en tiempo real con polilínea por ruta, marcador de camión y pantalla completa.',
+      'Página NuevaRuta con geocodificación (Nominatim) y trazado de ruta (OSRM).',
+      'Cobertura de tests ≥ 90% (71 backend, 98 frontend).',
+    ],
+  },
+];
+
 export default function AcercaDe() {
+
+function ChangelogEntry({ entry }) {
+  const [open, setOpen] = useState(entry.version === 'Unreleased');
+  const isUnreleased = entry.version === 'Unreleased';
+  return (
+    <li className="border-b border-slate-100 last:border-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="flex items-center gap-2">
+          <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${isUnreleased ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-50 text-blue-700'}`}>
+            {isUnreleased ? 'Unreleased' : `v${entry.version}`}
+          </span>
+          <span className="text-xs text-slate-400">{entry.date}</span>
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="px-4 pb-3 space-y-2">
+          {entry.added?.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">Agregado</p>
+              <ul className="space-y-0.5">
+                {entry.added.map((item) => (
+                  <li key={item} className="text-xs text-slate-600 flex gap-1.5">
+                    <span className="text-green-500 shrink-0">+</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {entry.fixed?.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Corregido</p>
+              <ul className="space-y-0.5">
+                {entry.fixed.map((item) => (
+                  <li key={item} className="text-xs text-slate-600 flex gap-1.5">
+                    <span className="text-blue-500 shrink-0">~</span>{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
   const navigate = useNavigate();
 
   return (
@@ -66,6 +175,16 @@ export default function AcercaDe() {
         <p className="text-xs text-slate-600">
           Ruteo: <a href="https://project-osrm.org" className="text-brand-600 underline" target="_blank" rel="noopener noreferrer">OSRM</a> — BSD 2-Clause
         </p>
+      </section>
+
+      {/* Changelog */}
+      <section className="card p-0">
+        <p className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100">Changelog</p>
+        <ul>
+          {CHANGELOG.map((entry) => (
+            <ChangelogEntry key={entry.version} entry={entry} />
+          ))}
+        </ul>
       </section>
 
       {/* Credits */}
