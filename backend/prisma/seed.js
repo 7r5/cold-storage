@@ -71,19 +71,19 @@ async function main() {
         status: "PENDING",
         // Trayectoria detallada siguiendo la curva de la autopista
         waypoints: [
-            [-100.0, 20.3889],
-            [-100.025, 20.405],
-            [-100.063, 20.432],
-            [-100.102, 20.465],
-            [-100.138, 20.498],
-            [-100.185, 20.515],
-            [-100.235, 20.538],
-            [-100.282, 20.555],
-            [-100.321, 20.572],
-            [-100.355, 20.584],
-            [-100.375, 20.591],
-            [-100.3885, 20.5935],
-            [-100.405, 20.5925],
+          [20.3889, -100.0], // Salida de San Juan del Río (Centro)
+          [20.405, -100.025], // Incorporación a la Autopista 57
+          [20.432, -100.063], // Pasando Loma Linda
+          [20.465, -100.102], // Cercanías de la caseta auxiliar
+          [20.498, -100.138], // Pedro Escobedo
+          [20.515, -100.185], // Zona industrial de El Sauz
+          [20.538, -100.235], // Entrada a El Colorado
+          [20.555, -100.282], // Parque Industrial El Marqués
+          [20.572, -100.321], // Monumento a Conín
+          [20.584, -100.355], // Inicio de la Cuesta China
+          [20.591, -100.375], // Vista Alegre / Bernardo Quintana
+          [20.5935, -100.3885], // Los Arcos de Querétaro
+          [20.5925, -100.405], // Centro Histórico (Destino final)
         ],
       },
     });
