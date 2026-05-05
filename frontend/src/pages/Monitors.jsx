@@ -30,21 +30,16 @@ function MapResizer({ trigger }) {
   return null;
 }
 
-function MapController({ allRoutes, autoView }) {
+// Follows the locked truck by panning without changing zoom level
+function CameraLock({ lockedRouteId, liveRoutes }) {
   const map = useMap();
   useEffect(() => {
-    if (autoView) {
-      const allPoints = Object.values(allRoutes).flat();
-      if (allPoints.length > 0) {
-        const bounds = L.latLngBounds(allPoints);
-        map.fitBounds(bounds, {
-          padding: [50, 50],
-          maxZoom: 15,
-          animate: true,
-        });
-      }
-    }
-  }, [allRoutes, autoView, map]);
+    if (!lockedRouteId) return;
+    const points = liveRoutes[String(lockedRouteId)] || [];
+    if (points.length === 0) return;
+    const last = points[points.length - 1];
+    map.setView(last, map.getZoom(), { animate: true, duration: 0.8 });
+  }, [liveRoutes, lockedRouteId, map]);
   return null;
 }
 
@@ -72,7 +67,7 @@ export default function Monitors() {
   const [routes, setRoutes] = useState([]);
   const [liveRoutes, setLiveRoutes] = useState({});
   const [liveReadings, setLiveReadings] = useState({});
-  const [autoView, setAutoView] = useState(true);
+  const [lockedRouteId, setLockedRouteId] = useState(null);
   const [visiblePlannedRoutes, setVisiblePlannedRoutes] = useState({});
   const [mapFullscreen, setMapFullscreen] = useState(false);
 
@@ -164,32 +159,47 @@ export default function Monitors() {
   }, []);
 
   const togglePlannedView = (routeId) => {
-    setVisiblePlannedRoutes((prev) => ({ ...prev, [routeId]: !prev[routeId] }));
+    const rid = String(routeId);
+    const willBeVisible = !visiblePlannedRoutes[routeId];
+    setVisiblePlannedRoutes((prev) => ({ ...prev, [routeId]: willBeVisible }));
+    if (willBeVisible) {
+      setLockedRouteId(rid);
+    } else {
+      setLockedRouteId((prev) => (prev === rid ? null : prev));
+    }
   };
+
+  const sortedRoutes = [...routes].sort((a, b) => {
+    const order = { ACTIVE: 0, PENDING: 1, COMPLETED: 2 };
+    return (order[a.status] ?? 1) - (order[b.status] ?? 1);
+  });
 
   const defaultCenter = [20.5879, -100.3927];
 
   return (
     <div className="flex flex-col gap-4 pb-20">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-slate-100 mx-1">
+      <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mx-1">
         <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">
           Panel de Monitoreo
         </h2>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">
-            Auto-Zoom
-          </span>
+      </div>
+
+      {/* Unlock camera button — visible only when a truck is being followed */}
+      {lockedRouteId && (
+        <div className="mx-1">
           <button
-            onClick={() => setAutoView(!autoView)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${autoView ? "bg-blue-600" : "bg-slate-300"}`}
+            onClick={() => setLockedRouteId(null)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors"
           >
-            <span
-              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoView ? "translate-x-5" : "translate-x-1"}`}
-            />
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+            </svg>
+            Desbloquear cámara
           </button>
         </div>
-      </div>
+      )}
 
       {/* Mapa */}
       <section
@@ -229,7 +239,8 @@ export default function Monitors() {
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          />{" "}          <MapResizer trigger={mapFullscreen} />          <MapController allRoutes={liveRoutes} autoView={autoView} />
+          />{" "}          <MapResizer trigger={mapFullscreen} />
+          <CameraLock lockedRouteId={lockedRouteId} liveRoutes={liveRoutes} />
           {routes.map((route) => {
             const truck = route.truck;
             const truckId = truck ? String(truck.id) : null;
@@ -301,7 +312,7 @@ export default function Monitors() {
 
       {/* Grid de Tarjetas */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-1">
-        {routes.map((r) => {
+        {sortedRoutes.map((r) => {
           const truck = r.truck;
           const isSelected = !!visiblePlannedRoutes[r.id];
           const isCompleted = r.status === "COMPLETED";
@@ -425,7 +436,7 @@ export default function Monitors() {
               <p
                 className={`text-[9px] font-bold mt-3 text-center uppercase tracking-tighter ${isSelected ? "text-blue-500" : "text-slate-400"}`}
               >
-                {isSelected ? "Cerrar Detalles" : "Ver Guía de Ruta"}
+                {isSelected ? "Ocultar ruta · soltar cámara" : "Ver ruta · seguir camión"}
               </p>
             </div>
           );
