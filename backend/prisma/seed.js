@@ -1,6 +1,25 @@
 // Seed dummy data for the POC. Idempotent: safe to re-run.
 const { PrismaClient } = require("@prisma/client");
 
+// Expand a small set of key [lng, lat] waypoints into `count` evenly-spaced points.
+function expandWaypoints(keyPoints, count) {
+  const segments = keyPoints.length - 1;
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    const scaled = t * segments;
+    const idx = Math.min(Math.floor(scaled), segments - 1);
+    const frac = scaled - idx;
+    const [lng1, lat1] = keyPoints[idx];
+    const [lng2, lat2] = keyPoints[idx + 1];
+    result.push([
+      +(lng1 + (lng2 - lng1) * frac).toFixed(6),
+      +(lat1 + (lat2 - lat1) * frac).toFixed(6),
+    ]);
+  }
+  return result;
+}
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -69,22 +88,22 @@ async function main() {
         originName: "San Juan del Río, Qro",
         destinationName: "Querétaro Capital, Qro",
         status: "PENDING",
-        // Trayectoria detallada siguiendo la curva de la autopista
-        waypoints: [
-            [-100.0, 20.3889],
-            [-100.025, 20.405],
-            [-100.063, 20.432],
-            [-100.102, 20.465],
-            [-100.138, 20.498],
-            [-100.185, 20.515],
-            [-100.235, 20.538],
-            [-100.282, 20.555],
-            [-100.321, 20.572],
-            [-100.355, 20.584],
-            [-100.375, 20.591],
-            [-100.3885, 20.5935],
-            [-100.405, 20.5925],
-        ],
+        // 100 interpolated [lng, lat] points along Carretera 57
+        waypoints: expandWaypoints([
+          [-100.0,    20.3889],
+          [-100.025,  20.405],
+          [-100.063,  20.432],
+          [-100.102,  20.465],
+          [-100.138,  20.498],
+          [-100.185,  20.515],
+          [-100.235,  20.538],
+          [-100.282,  20.555],
+          [-100.321,  20.572],
+          [-100.355,  20.584],
+          [-100.375,  20.591],
+          [-100.3885, 20.5935],
+          [-100.405,  20.5925],
+        ], 100),
       },
     });
   }
