@@ -106,7 +106,7 @@ async function main() {
 
   // Ruta compleja: San Juan del Río -> Querétaro Capital (Vía Carretera 57)
   const existingRoute = await prisma.route.findFirst({
-    where: { truckId: trucks[0].id, originName: "San Juan del Río" },
+    where: { truckId: trucks[0].id, originName: "San Juan del Río, Qro" },
   });
 
   if (!existingRoute) {
