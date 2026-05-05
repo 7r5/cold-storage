@@ -360,7 +360,7 @@ export default function Monitors() {
               <div className="flex justify-between items-start mb-3">
                 <div className="max-w-[70%]">
                   <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    {isCompleted ? "Finalizado" : isActive ? "En Tránsito" : "Pendiente"}
+                    {isActive ? "En Tránsito" : "Inactivo"}
                   </h3>
                   <p className="text-base font-bold text-slate-800 leading-tight">
                     {r.originName.split(",")[0]} →{" "}
