@@ -135,6 +135,27 @@ git push origin master
 
 ---
 
+## CHANGELOG (mandatory)
+**Before every `git commit`, update `CHANGELOG.md`** with a brief entry under the matching version heading:
+
+- If the version already has a heading, append a bullet to it.
+- If it is a new version, add a new `## [X.Y.Z] - YYYY-MM-DD` heading at the top of the changelog body.
+- Use plain English (one line per logical change).
+- Do **not** leave the changelog unmodified when code changes are committed.
+
+---
+
+## Pre-commit gate (mandatory)
+**Never run `git commit` or `git push` until all of the following pass without errors:**
+
+1. **Backend tests** — `npm test --runInBand` from `backend/` → all suites green.
+2. **Frontend build** — `npx vite build` from `frontend/` → exits 0, no esbuild errors.
+3. **Frontend tests** — `npm test -- --forceExit` from `frontend/` → all suites green.
+
+If any step fails, fix the issue first, then re-run the full gate before committing.
+
+---
+
 ## Files that require explicit user confirmation before editing
 Any change to the following files must be confirmed by the user before proceeding:
 

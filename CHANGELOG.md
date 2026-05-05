@@ -7,6 +7,49 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [0.3.2] — 2026-05-05
+
+### Fixed
+- `TruckDetail`: etiqueta `<p>` faltante en el tile de Temperatura (causaba error de sintaxis JSX).
+- `TruckDetail`: color de temperatura en tabla de historial actualizado a `violet-600` para consistencia.
+
+### Changed
+- Rangos de cajas actualizados en seed upsert (`-25`/`-13` °C · `58`/`82` % HR) — se aplican en cada deploy.
+
+---
+
+## [0.3.1] — 2026-05-05
+
+### Added
+- `TruckDetail`: gráficas `SensorChart` (línea con banda de rango aceptable) y `AggregateChart` (barras).
+- `TruckDetail`: vista por hora / día / mes con selector de agregación por caja.
+- `TruckDetail`: estadísticas min·avg·max en cada sección de sensor.
+- Modelo `BranchStock` en Prisma + seed con 25 registros distribuidos en 4 sucursales.
+- `GET /api/branches` incluye stock con producto anidado; `GET /api/branches/:id/stock`.
+- Inventario — pestaña Sucursales: acordeón `BranchCard` con productos agrupados por categoría.
+- Alertas — pestaña Historial: gráficas de barras por hora del día y día de la semana, chips de resumen, lista de últimas 20 alertas.
+- `GET /api/alerts` acepta `?onlyActive`, `?since=ISO`, `?limit=N`.
+
+### Changed
+- Temperatura usa `violet-600` en estado normal (antes `blue-600`) — el rojo queda reservado para alertas reales.
+- GPS tick reducido a 1 segundo (antes 5 s) → 120 puntos por ruta, polilínea más suave.
+- Rangos de caja ampliados a `-25`/`-13` °C para reducir alertas espurias.
+- Flag `naturalAlertFired` en simulador: máximo 1 alerta natural por ciclo de ruta.
+
+### Fixed
+- Prisma Studio en Render: proxy `studio-proxy.js` resuelve el bind a `0.0.0.0`.
+
+---
+
+## [0.3.0] — 2026-05-05
+
+### Added
+- Splash screen en HTML (`index.html`) con `logo.jpeg`, fondo `#0f172a`, fade de 400 ms a 1.2 s.
+- `manifest.json` unificado: solo `favicon.png` como icono PWA con `purpose: "any maskable"`.
+- `__CHANGELOG__` inyectado en build time desde `CHANGELOG.md` vía `vite.config.js`.
+
+---
+
 ## [Unreleased] — 2026-05-04
 
 ### Added
