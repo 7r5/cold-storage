@@ -64,6 +64,7 @@ export default function Monitors() {
   const [liveReadings, setLiveReadings] = useState({});
   const [autoView, setAutoView] = useState(true);
   const [visiblePlannedRoutes, setVisiblePlannedRoutes] = useState({});
+  const [mapFullscreen, setMapFullscreen] = useState(false);
 
   useEffect(() => {
     // 1. Cargar Datos Iniciales (Rutas, Historial y Lecturas de sensores)
@@ -168,7 +169,35 @@ export default function Monitors() {
       </div>
 
       {/* Mapa */}
-      <section className="relative z-10 mx-1 border rounded-xl overflow-hidden shadow-inner bg-slate-100 h-80">
+      <section
+        className={`relative border overflow-hidden shadow-inner bg-slate-100 transition-all duration-200 ${
+          mapFullscreen
+            ? "fixed inset-0 z-50 rounded-none mx-0 h-full"
+            : "z-10 mx-1 rounded-xl h-80"
+        }`}
+      >
+        {/* Fullscreen toggle button */}
+        <button
+          onClick={() => setMapFullscreen((v) => !v)}
+          aria-label={mapFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+          className="absolute top-2 right-2 z-[1000] bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-1.5 shadow-md text-slate-600 hover:text-slate-900 hover:bg-white transition-colors"
+        >
+          {mapFullscreen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
+              <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
+              <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
+              <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+            </svg>
+          )}
+        </button>
         <MapContainer
           center={defaultCenter}
           zoom={12}
