@@ -145,13 +145,31 @@ export default function Monitors() {
       api.get("/api/routes").then(setRoutes).catch(() => {});
     };
 
+    // When a route stops, refresh routes and clear stale live readings for its boxes
+    const onRouteStopped = ({ routeId }) => {
+      api.get("/api/routes").then((updated) => {
+        setRoutes(updated);
+        // Find the completed route's boxes and wipe their live readings
+        const stopped = updated.find((rt) => String(rt.id) === String(routeId));
+        if (stopped?.truck?.boxes) {
+          setLiveReadings((prev) => {
+            const next = { ...prev };
+            stopped.truck.boxes.forEach((b) => { delete next[String(b.id)]; });
+            return next;
+          });
+        }
+      }).catch(() => {});
+    };
+
     socket.on("route:started", onRouteStarted);
+    socket.on("route:stopped", onRouteStopped);
     socket.on("truck:position", onPos);
     socket.on("box:reading", onReading);
     socket.on("alert:new", onAlert);
 
     return () => {
       socket.off("route:started", onRouteStarted);
+      socket.off("route:stopped", onRouteStopped);
       socket.off("truck:position", onPos);
       socket.off("box:reading", onReading);
       socket.off("alert:new", onAlert);
@@ -315,6 +333,7 @@ export default function Monitors() {
         {sortedRoutes.map((r) => {
           const truck = r.truck;
           const isSelected = !!visiblePlannedRoutes[r.id];
+          const isActive = r.status === "ACTIVE";
           const isCompleted = r.status === "COMPLETED";
           const color = truck ? getTruckColor(truck.id) : "#cbd5e1";
           const hasActiveAlert = truck?.boxes?.some(
@@ -341,7 +360,7 @@ export default function Monitors() {
               <div className="flex justify-between items-start mb-3">
                 <div className="max-w-[70%]">
                   <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    {isCompleted ? "Finalizado" : "En Tránsito"}
+                    {isCompleted ? "Finalizado" : isActive ? "En Tránsito" : "Pendiente"}
                   </h3>
                   <p className="text-base font-bold text-slate-800 leading-tight">
                     {r.originName.split(",")[0]} →{" "}
@@ -359,7 +378,7 @@ export default function Monitors() {
                 </div>
               </div>
 
-              {!isCompleted && truck?.boxes && truck.boxes.length > 0 && (
+              {isActive && truck?.boxes && truck.boxes.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   {truck.boxes.map((box) => {
                     const data = liveReadings[String(box.id)];
@@ -428,7 +447,7 @@ export default function Monitors() {
                   })}
                 </div>
               )}
-              {!isCompleted && (!truck?.boxes || truck.boxes.length === 0) && (
+              {isActive && (!truck?.boxes || truck.boxes.length === 0) && (
                 <p className="text-xs text-slate-400 mt-2 text-center">
                   Sin cajas registradas
                 </p>

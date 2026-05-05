@@ -17,7 +17,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 - Rangos de cajas actualizados en seed upsert (`-25`/`-13` °C · `58`/`82` % HR) — se aplican en cada deploy.
 - Alertas: gráficas de barras cambiadas a azul (`blue-600`/`cyan-600`); chip de conteo de temperatura usa `violet-600`. Rojo ahora reservado solo para severidad CRITICAL y badge de alertas activas.
 - Alertas historial: gráfica "por hora" muestra solo el dia de hoy de 00:00 hasta la hora actual; gráfica "por dia" muestra hoy + 7 dias anteriores con fechas reales (ej. "5 may").
-- `render.yaml`: `npm install` → `npm ci` en los 3 servicios; `buildFilter.paths` para evitar redeploys innecesarios; `autoDeploy: false` en Prisma Studio.
+### Fixed (Monitores)
+- Tarjetas de ruta ahora escuchan `route:stopped` via socket → status cambia a "Finalizado" en tiempo real sin recargar.
+- Secciones de cajas (temp/hum) solo se muestran cuando `status === ACTIVE`; en Pendiente y Finalizado se ocultan correctamente.
+- Label de estado ahora muestra tres valores: "En Tránsito" / "Finalizado" / "Pendiente".
+- Al finalizar una ruta, las lecturas en vivo de sus cajas se limpian del estado local.- `render.yaml`: `npm install` → `npm ci` en los 3 servicios; `buildFilter.paths` para evitar redeploys innecesarios; `autoDeploy: false` en Prisma Studio.
 
 ---
 
