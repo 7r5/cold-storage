@@ -227,7 +227,7 @@ function BoxCard({ box, readings }) {
   const last = readings[readings.length - 1];
   const tempOk = last == null || (last.temperature >= box.targetTempMin && last.temperature <= box.targetTempMax);
   const humOk  = last == null || (last.humidity >= box.targetHumMin && last.humidity <= box.targetHumMax);
-  const tempColor = tempOk ? "#3b82f6" : "#ef4444";
+  const tempColor = tempOk ? "#7c3aed" : "#ef4444";
   const humColor  = humOk  ? "#14b8a6" : "#ca8a04";
 
   const timestamps  = useMemo(() => readings.map((r) => r.recordedAt), [readings]);
@@ -276,7 +276,7 @@ function BoxCard({ box, readings }) {
       <div className="grid grid-cols-2 gap-2">
         <div className={`p-3 rounded-xl border ${tempOk ? "border-slate-100 bg-slate-50" : "border-red-200 bg-red-50"}`}>
           <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Temperatura</p>
-          <p className={`text-3xl font-black font-mono ${tempOk ? "text-blue-600" : "text-red-500"}`}>
+              className={`text-3xl font-black font-mono ${tempOk ? "text-violet-600" : "text-red-500"}`}>
             {last ? `${last.temperature.toFixed(1)}°` : "—"}
           </p>
           <p className="text-xs text-slate-400">°C</p>
