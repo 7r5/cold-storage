@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -232,7 +232,7 @@ export default function Monitors() {
               : [];
 
             return (
-              <div key={route.id}>
+              <Fragment key={route.id}>
                 {isManualToggle && waypoints.length > 0 && (
                   <>
                     <Polyline
@@ -280,7 +280,7 @@ export default function Monitors() {
                     </Marker>
                   </>
                 )}
-              </div>
+              </Fragment>
             );
           })}
         </MapContainer>
