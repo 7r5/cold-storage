@@ -37,6 +37,12 @@ description: "Guidelines for the Cold Chain Control web app (React + Vite + Tail
 - Keep Spanish strings inline for now (no i18n framework). If a string is reused in 3+ places, extract to a small `const` in the same module — do not introduce a translations library without asking.
 - Never embed secrets or tokens in source.
 
+## Known pitfalls (lessons learned from real deploy failures)
+- **Never duplicate component declarations in the same file.** If a file accidentally ends up with two `function Sparkline` or two `export default function TruckDetail`, esbuild (used by Vite) will fail the production build with `The symbol has already been declared` / `Multiple exports with the same name`. Always check for duplicate top-level identifiers after large edits.
+  - *Root cause*: `TruckDetail.jsx` had its full content pasted twice (590 lines instead of 287) → build failed on Render.
+- **Never use curly/typographic quotes (`“` `”` `‘` `’`) inside JavaScript string literals** in any `.js`/`.jsx` file. Node treats them as unexpected identifiers. Always use straight ASCII quotes.
+- **After any significant edit to a page component, run `npx vite build` locally** to catch esbuild errors before pushing.
+
 ## React / code style
 - Format with **Prettier** (project default config). Run it before committing; do not hand-format.
 - Functional components + hooks only. No class components.

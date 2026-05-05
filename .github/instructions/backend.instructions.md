@@ -34,6 +34,11 @@ Even though all data is dummy, ask the user before modifying:
 - API JSON keys: `camelCase`.
 - User-facing error strings returned to the API (`error: '...'`) may stay in Spanish (frontend is in Spanish) — keep them short and consistent with existing routes.
 
+## Known pitfalls (lessons learned from real deploy failures)
+- **Never use curly/typographic quotes (`“` `”` `‘` `’`) inside JavaScript string literals** in seed files or any `.js` file. Node treats them as unexpected identifiers and throws a `SyntaxError` at startup. Always use straight ASCII quotes (`'` or `"`).
+  - *Root cause*: `seed.js` FAQ answers contained `“Simular ruta”` inside a double-quoted string → `SyntaxError: Unexpected identifier 'ruta'` on Node 24 during Render build.
+- **Validate seed files parse cleanly before pushing**: run `node --check prisma/seed.js` before every commit that touches the seed.
+
 ## Code style
 - Format with **Prettier** (project default config). Run it before committing; do not hand-format.
 - Prefer small, pure functions. Keep route handlers thin; push logic into helpers/services.
