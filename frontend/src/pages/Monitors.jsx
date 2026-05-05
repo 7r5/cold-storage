@@ -113,6 +113,17 @@ export default function Monitors() {
     // 2. Configuración de Socket
     const socket = getSocket();
 
+    // When a route starts, clear the stale in-memory polyline so the map
+    // builds the path progressively from scratch (not from old socket frames).
+    const onRouteStarted = ({ routeId }) => {
+      if (routeId == null) return;
+      setLiveRoutes((prev) => {
+        const next = { ...prev };
+        delete next[String(routeId)];
+        return next;
+      });
+    };
+
     const onPos = ({ routeId, lat, lng }) => {
       // Engine always emits { lat, lng } in [lat, lng] order (Leaflet-ready)
       // Keyed by routeId to prevent mixing points from different routes of the same truck
@@ -139,11 +150,13 @@ export default function Monitors() {
       api.get("/api/routes").then(setRoutes).catch(() => {});
     };
 
+    socket.on("route:started", onRouteStarted);
     socket.on("truck:position", onPos);
     socket.on("box:reading", onReading);
     socket.on("alert:new", onAlert);
 
     return () => {
+      socket.off("route:started", onRouteStarted);
       socket.off("truck:position", onPos);
       socket.off("box:reading", onReading);
       socket.off("alert:new", onAlert);

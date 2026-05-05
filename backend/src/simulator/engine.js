@@ -167,6 +167,10 @@ async function startRoute(routeId) {
     throw new Error('El camión ya tiene una ruta activa');
   }
 
+  // Clear stale positions from previous runs so the map always builds
+  // the polyline progressively from scratch (prevents "full route on load").
+  await prisma.position.deleteMany({ where: { routeId } });
+
   await prisma.route.update({
     where: { id: routeId },
     data: { status: 'ACTIVE', startedAt: new Date() },
