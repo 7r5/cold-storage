@@ -63,6 +63,7 @@ model Box {
   truck    Truck     @relation(fields: [truckId], references: [id], onDelete: Cascade)
   readings Reading[]
   alerts   Alert[]
+  loads    BoxLoad[]
 
   @@map("boxes")
 }
@@ -73,13 +74,20 @@ model Route {
   truckId         Int          @map("truck_id")
   originName      String       @map("origin_name")
   destinationName String       @map("destination_name")
+  // Optional FKs to Branch — null when branch is not yet registered
+  originBranchId      Int?     @map("origin_branch_id")
+  destinationBranchId Int?     @map("destination_branch_id")
   status          RouteStatus  @default(PENDING)
   // Array of [lng, lat] coordinates (waypoints to interpolate)
   waypoints       Json
   startedAt       DateTime?    @map("started_at")
   finishedAt      DateTime?    @map("finished_at")
 
-  truck Truck @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  truck              Truck     @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  originBranch       Branch?   @relation("RouteOrigin", fields: [originBranchId], references: [id])
+  destinationBranch  Branch?   @relation("RouteDestination", fields: [destinationBranchId], references: [id])
+  loads              BoxLoad[]
+  readings           Reading[]
 
   @@map("routes")
 }
@@ -104,18 +112,75 @@ model Position {
   @@map("positions")
 }
 
-// Sensor reading from a box
+// Sensor reading from a box, optionally linked to the active route at record time
 model Reading {
   id          Int      @id @default(autoincrement())
   boxId       Int      @map("box_id")
+  routeId     Int?     @map("route_id")
   temperature Float
   humidity    Float
   recordedAt  DateTime @default(now()) @map("recorded_at")
 
-  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  route Route? @relation(fields: [routeId], references: [id], onDelete: SetNull)
 
   @@index([boxId, recordedAt])
+  @@index([routeId])
   @@map("readings")
+}
+
+// A physical branch: warehouse, pharmacy, hospital, or distribution center.
+// Linked optionally to Route as origin/destination.
+model Branch {
+  id      Int        @id @default(autoincrement())
+  name    String
+  address String?
+  city    String
+  type    BranchType @default(WAREHOUSE)
+
+  originRoutes      Route[] @relation("RouteOrigin")
+  destinationRoutes Route[] @relation("RouteDestination")
+
+  @@map("branches")
+}
+
+enum BranchType {
+  WAREHOUSE
+  PHARMACY
+  HOSPITAL
+  DISTRIBUTION_CENTER
+}
+
+// A pharmaceutical product that can be loaded into boxes.
+// Temperature/humidity alert thresholds remain on Box (physical container).
+model Product {
+  id          Int     @id @default(autoincrement())
+  sku         String  @unique
+  name        String
+  description String?
+  category    String?
+
+  loads BoxLoad[]
+
+  @@map("products")
+}
+
+// The load assigned to a specific box for a specific route.
+// Records what pharmaceutical product is in each box during a trip.
+model BoxLoad {
+  id        Int    @id @default(autoincrement())
+  boxId     Int    @map("box_id")
+  productId Int    @map("product_id")
+  routeId   Int    @map("route_id")
+  quantity  Float
+  unit      String @default("units")
+
+  box     Box     @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  route   Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@unique([boxId, productId, routeId])
+  @@map("box_loads")
 }
 
 // Alert raised when a reading is out of range
