@@ -70,7 +70,9 @@ function interpolate(waypoints, progress) {
  */
 function timeOfDayOffset() {
   const hour = new Date().getHours() + new Date().getMinutes() / 60;
-  return +(-5 * Math.cos((2 * Math.PI * (hour - 2)) / 24)).toFixed(2);
+  const base = -5 * Math.cos((2 * Math.PI * (hour - 2)) / 24);
+  const jitter = (Math.random() - 0.5) * 2; // ±1 °C random variation
+  return +(base + jitter).toFixed(2);
 }
 
 function generateReading(box, forcedTempOffset = 0, forcedHumOffset = 0) {
