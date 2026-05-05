@@ -1,0 +1,25 @@
+{
+  "name": "ColdTrack — Cadena de Frío",
+  "short_name": "ColdTrack",
+  "description": "Monitoreo en tiempo real de cadena de frío farmacéutica.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#1b73e8",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}
