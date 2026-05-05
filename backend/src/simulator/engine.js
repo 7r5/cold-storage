@@ -8,7 +8,8 @@
 const prisma = require('../db');
 
 // Tunables
-const TICK_MS = 5000;            // emit positions/readings every 5s
+const POSITION_TICK_MS = 1000;    // emit GPS position every 1s (smooth polyline)
+const READING_TICK_MS = 5000;     // emit sensor readings every 5s (DB-friendly)
 const ROUTE_DURATION_MS = 120_000; // 120s to traverse a route (demo speed)
 
 // State per trucking session
@@ -106,6 +107,22 @@ function checkAlert(box, reading) {
   return alerts;
 }
 
+async function positionTick(truckId) {
+  const session = activeTrucks.get(truckId);
+  if (!session) return;
+
+  const elapsed = Date.now() - session.startedAt;
+  const progress = Math.min(elapsed / session.durationMs, 1);
+  const [lat, lng] = interpolate(session.waypoints, progress);
+
+  await prisma.position.create({ data: { truckId, routeId: session.routeId, lat, lng } });
+  emit('truck:position', { truckId, routeId: session.routeId, lat, lng, progress });
+
+  if (progress >= 1) {
+    await stopRoute(truckId, 'COMPLETED');
+  }
+}
+
 async function tick(truckId) {
   const session = activeTrucks.get(truckId);
   if (!session) return;
@@ -116,10 +133,7 @@ async function tick(truckId) {
   // Aquí recibimos [lat, lng] gracias a la corrección en interpolate
   const [lat, lng] = interpolate(session.waypoints, progress);
 
-  // Persist + emit position
-  // lat guardará ~20.5 y lng guardará ~-100.4
-  await prisma.position.create({ data: { truckId, routeId: session.routeId, lat, lng } });
-  emit('truck:position', { truckId, routeId: session.routeId, lat, lng, progress });
+  // Position is handled by positionTick; here we only process readings/alerts.
 
   // Readings for every box of the truck
   const boxes = await prisma.box.findMany({ where: { truckId } });
@@ -168,9 +182,7 @@ async function tick(truckId) {
   }
 
   // Finish if route done
-  if (progress >= 1) {
-    await stopRoute(truckId, 'COMPLETED');
-  }
+  if (progress >= 1) return; // stopRoute already called by positionTick
 }
 
 async function startRoute(routeId) {
@@ -200,11 +212,15 @@ async function startRoute(routeId) {
     waypoints: route.waypoints,
     forcedTempOffset: 0,
     forcedHumOffset: 0,
-    intervalId: null,
+    positionIntervalId: null,
+    readingIntervalId: null,
   };
-  session.intervalId = setInterval(() => {
+  session.positionIntervalId = setInterval(() => {
+    positionTick(route.truckId).catch((e) => console.error('positionTick error', e));
+  }, POSITION_TICK_MS);
+  session.readingIntervalId = setInterval(() => {
     tick(route.truckId).catch((e) => console.error('tick error', e));
-  }, TICK_MS);
+  }, READING_TICK_MS);
   activeTrucks.set(route.truckId, session);
 
   emit('route:started', { routeId, truckId: route.truckId });
@@ -214,7 +230,8 @@ async function startRoute(routeId) {
 async function stopRoute(truckId, finalStatus = 'COMPLETED') {
   const session = activeTrucks.get(truckId);
   if (!session) return;
-  clearInterval(session.intervalId);
+  clearInterval(session.positionIntervalId);
+  clearInterval(session.readingIntervalId);
   activeTrucks.delete(truckId);
 
   await prisma.route.update({

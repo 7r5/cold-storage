@@ -37,11 +37,13 @@ describe('simulator helpers', () => {
     };
 
     it('produces values near the midpoint without offset', () => {
+      // timeOfDayOffset() adds up to ±6 °C (±5 base + ±1 jitter) on top of the
+      // midpoint (-19 °C), so the plausible output range is [-26, -12].
       const r = generateReading(box);
-      expect(r.temperature).toBeGreaterThan(-20);
-      expect(r.temperature).toBeLessThan(-18);
-      expect(r.humidity).toBeGreaterThan(60);
-      expect(r.humidity).toBeLessThan(80);
+      expect(r.temperature).toBeGreaterThan(-27);
+      expect(r.temperature).toBeLessThan(-12);
+      expect(r.humidity).toBeGreaterThan(59);
+      expect(r.humidity).toBeLessThan(81);
     });
 
     it('shifts values when forced offsets are provided', () => {
