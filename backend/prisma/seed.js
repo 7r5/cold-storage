@@ -200,6 +200,47 @@ async function main() {
     }
   }
 
+  // Branch stock (products at each branch — independent of routes)
+  const stockData = [
+    // CEDIS Queretaro Norte — full assortment
+    { branchIdx: 0, productIdx: 0, quantity: 5000, unit: "dosis" },
+    { branchIdx: 0, productIdx: 1, quantity: 800,  unit: "viales" },
+    { branchIdx: 0, productIdx: 2, quantity: 8000, unit: "dosis" },
+    { branchIdx: 0, productIdx: 3, quantity: 60,   unit: "viales" },
+    { branchIdx: 0, productIdx: 4, quantity: 600,  unit: "viales" },
+    { branchIdx: 0, productIdx: 5, quantity: 40,   unit: "viales" },
+    { branchIdx: 0, productIdx: 6, quantity: 3000, unit: "dosis" },
+    { branchIdx: 0, productIdx: 7, quantity: 900,  unit: "jeringas" },
+    // Farmacia Central Corregidora
+    { branchIdx: 1, productIdx: 1, quantity: 120,  unit: "viales" },
+    { branchIdx: 1, productIdx: 4, quantity: 80,   unit: "viales" },
+    { branchIdx: 1, productIdx: 8, quantity: 50,   unit: "plumas" },
+    { branchIdx: 1, productIdx: 7, quantity: 200,  unit: "jeringas" },
+    // Hospital Star Medica
+    { branchIdx: 2, productIdx: 0, quantity: 1200, unit: "dosis" },
+    { branchIdx: 2, productIdx: 2, quantity: 2000, unit: "dosis" },
+    { branchIdx: 2, productIdx: 3, quantity: 30,   unit: "viales" },
+    { branchIdx: 2, productIdx: 5, quantity: 18,   unit: "viales" },
+    { branchIdx: 2, productIdx: 6, quantity: 800,  unit: "dosis" },
+    { branchIdx: 2, productIdx: 9, quantity: 1500, unit: "dosis" },
+    // Almacen Frio San Juan del Rio
+    { branchIdx: 3, productIdx: 0, quantity: 2000, unit: "dosis" },
+    { branchIdx: 3, productIdx: 1, quantity: 400,  unit: "viales" },
+    { branchIdx: 3, productIdx: 2, quantity: 4000, unit: "dosis" },
+    { branchIdx: 3, productIdx: 4, quantity: 300,  unit: "viales" },
+    { branchIdx: 3, productIdx: 7, quantity: 500,  unit: "jeringas" },
+  ];
+  for (const s of stockData) {
+    const branchId = branches[s.branchIdx]?.id;
+    const productId = products[s.productIdx]?.id;
+    if (!branchId || !productId) continue;
+    await prisma.branchStock.upsert({
+      where: { branchId_productId: { branchId, productId } },
+      update: { quantity: s.quantity, unit: s.unit },
+      create: { branchId, productId, quantity: s.quantity, unit: s.unit },
+    });
+  }
+
   // A few historical readings per box (just to have data on the dashboard)
   for (const b of boxes) {
     const count = await prisma.reading.count({ where: { boxId: b.id } });

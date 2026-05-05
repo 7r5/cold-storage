@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
 const BRANCH_TYPE_LABEL = {
-  WAREHOUSE: 'Almacén',
+  WAREHOUSE: 'Almacen',
   PHARMACY: 'Farmacia',
   HOSPITAL: 'Hospital',
   DISTRIBUTION_CENTER: 'CEDIS',
@@ -94,6 +94,86 @@ function RouteLoadCard({ route }) {
           {route.loads.length === 0 && (
             <p className="px-4 py-3 text-sm text-slate-400">Sin carga registrada para esta ruta.</p>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── BranchCard with expandable stock list ──────────────────────────
+const CATEGORY_COLOR = {
+  Vacunas: 'bg-sky-100 text-sky-700',
+  Insulinas: 'bg-indigo-100 text-indigo-700',
+  Biologicos: 'bg-emerald-100 text-emerald-700',
+  Hormonas: 'bg-rose-100 text-rose-700',
+};
+
+function BranchCard({ branch }) {
+  const [open, setOpen] = useState(false);
+  const stock = branch.stock || [];
+  const totalItems = stock.length;
+
+  // Group by category
+  const byCategory = stock.reduce((acc, s) => {
+    const cat = s.product.category || 'Otros';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(s);
+    return acc;
+  }, {});
+
+  return (
+    <div className="card p-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full px-4 py-3 text-left flex items-start justify-between gap-3"
+      >
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-slate-800">{branch.name}</p>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${BRANCH_TYPE_COLOR[branch.type]}`}>
+              {BRANCH_TYPE_LABEL[branch.type]}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">{branch.city}</p>
+          {branch.address && <p className="text-xs text-slate-400">{branch.address}</p>}
+          <p className="text-xs text-slate-400 mt-1">
+            {totalItems > 0 ? `${totalItems} producto${totalItems !== 1 ? 's' : ''} en inventario` : 'Sin inventario registrado'}
+          </p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          className={`shrink-0 mt-1 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="border-t border-slate-100">
+          {totalItems === 0 && (
+            <p className="px-4 py-3 text-sm text-slate-400">Sin productos registrados en esta sucursal.</p>
+          )}
+          {Object.entries(byCategory).map(([cat, items]) => (
+            <div key={cat} className="px-4 py-3 space-y-2 border-b border-slate-50 last:border-0">
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${CATEGORY_COLOR[cat] || 'bg-slate-100 text-slate-500'}`}>
+                  {cat}
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {items.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-800 truncate">{s.product.name}</p>
+                      <p className="text-xs text-slate-400">{s.product.sku}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-700 shrink-0 tabular-nums">
+                      {s.quantity.toLocaleString('es-MX')} <span className="text-xs font-normal text-slate-400">{s.unit}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -202,18 +282,7 @@ export default function Inventory() {
             <div className="card text-center py-8 text-slate-400 text-sm">No hay sucursales registradas.</div>
           )}
           {branches.map((b) => (
-            <div key={b.id} className="card flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-slate-800">{b.name}</p>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${BRANCH_TYPE_COLOR[b.type]}`}>
-                    {BRANCH_TYPE_LABEL[b.type]}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">{b.city}</p>
-                {b.address && <p className="text-xs text-slate-400 mt-0.5">{b.address}</p>}
-              </div>
-            </div>
+            <BranchCard key={b.id} branch={b} />
           ))}
         </div>
       )}

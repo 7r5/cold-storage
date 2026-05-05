@@ -149,8 +149,9 @@ model Branch {
   city    String
   type    BranchType @default(WAREHOUSE)
 
-  originRoutes      Route[] @relation("RouteOrigin")
-  destinationRoutes Route[] @relation("RouteDestination")
+  originRoutes      Route[]        @relation("RouteOrigin")
+  destinationRoutes Route[]        @relation("RouteDestination")
+  stock             BranchStock[]
 
   @@map("branches")
 }
@@ -172,8 +173,25 @@ model Product {
   category    String?
 
   loads BoxLoad[]
+  stock BranchStock[]
 
   @@map("products")
+}
+
+// Inventory of a product at a specific branch (not related to routes/trucks)
+model BranchStock {
+  id         Int     @id @default(autoincrement())
+  branchId   Int     @map("branch_id")
+  productId  Int     @map("product_id")
+  quantity   Float
+  unit       String  @default("units")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  branch  Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([branchId, productId])
+  @@map("branch_stock")
 }
 
 // The load assigned to a specific box for a specific route.
