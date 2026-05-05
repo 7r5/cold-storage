@@ -101,21 +101,15 @@ export default function Monitors() {
     const socket = getSocket();
 
     const onPos = ({ truckId, lat, lng }) => {
-      if (!lat || !lng) return;
-      let cLat = lat,
-        cLng = lng;
-      // Normalización de coordenadas por si vienen invertidas del simulador
-      if (Math.abs(lat) > 90) {
-        cLat = lng;
-        cLng = lat;
-      }
+      // Engine always emits { lat, lng } in [lat, lng] order (Leaflet-ready)
+      if (lat == null || lng == null) return;
 
       setLiveRoutes((prev) => {
         const tid = String(truckId);
         const current = prev[tid] || [];
         const last = current[current.length - 1];
-        if (last && last[0] === cLat && last[1] === cLng) return prev;
-        return { ...prev, [tid]: [...current, [cLat, cLng]] };
+        if (last && last[0] === lat && last[1] === lng) return prev;
+        return { ...prev, [tid]: [...current, [lat, lng]] };
       });
     };
 

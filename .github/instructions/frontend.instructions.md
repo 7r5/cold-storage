@@ -47,6 +47,13 @@ description: "Guidelines for the Cold Chain Control web app (React + Vite + Tail
 - Derive state — don't duplicate it. Prefer `useMemo` over storing computed values in `useState`.
 - Avoid prop drilling beyond 2 levels: lift to context (`AuthContext` pattern) or a small custom hook.
 
+## Coordinate convention
+- `Route.waypoints` from the API arrive as **`[lng, lat]`** arrays (GeoJSON order, matches the external data source).
+  - Always swap to `[lat, lng]` before passing to react-leaflet: `route.waypoints.map(([lng, lat]) => [lat, lng])`.
+- Socket event `truck:position` sends `{ lat, lng }` already in Leaflet order — use as-is: `[lat, lng]`.
+- `GET /api/routes/live-history` returns `{ [truckId]: [[lat, lng], ...] }` — already in Leaflet order.
+- Never add runtime coordinate-order detection. If a value seems wrong, check the source convention and apply an explicit swap.
+
 ## Data layer
 - All HTTP calls go through `src/api/client.js`. Don't `fetch` from components directly.
 - All socket usage goes through `src/api/socket.js`. Components subscribe in `useEffect` and unsubscribe on unmount.

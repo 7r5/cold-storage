@@ -60,6 +60,13 @@ Even though all data is dummy, ask the user before modifying:
   - Sanitize/validate all numeric IDs with `Number(...)` + `Number.isInteger` checks before passing to Prisma.
   - Return `404` for "not found or not yours" to avoid resource enumeration.
 
+## Coordinate convention
+- `Route.waypoints` (Json field in DB) stores coordinates as **`[lng, lat]`** (GeoJSON / Mapbox order). This matches the external data source and must not be changed.
+- `Position` table columns are named `lat` and `lng` as separate `Float` fields and store values in their natural meaning (`lat ≈ 20`, `lng ≈ -100` for Mexico).
+- `engine.js` `interpolate()` receives `[lng, lat]` waypoints and returns `[lat, lng]` — keep this swap in place.
+- Socket event `truck:position` emits `{ lat, lng }` in natural order (lat ≈ 20, lng ≈ -100).
+- Never add runtime heuristics to detect coordinate order — if the convention changes, update the data and the swap in `interpolate()` explicitly.
+
 ## Sockets & simulator
 - Socket auth must reuse the same token verification as HTTP (`src/utils/token.js`).
 - The simulator (`src/simulator/engine.js`) is the single source of truth for synthetic readings/positions. Don't generate readings from route handlers.
