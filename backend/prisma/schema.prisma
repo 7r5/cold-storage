@@ -74,7 +74,7 @@ model Route {
   originName      String       @map("origin_name")
   destinationName String       @map("destination_name")
   status          RouteStatus  @default(PENDING)
-  // Array of [lng, lat] coordinates (waypoints to interpolate)
+  // Array of [lat, lng] coordinates (waypoints to interpolate)
   waypoints       Json
   startedAt       DateTime?    @map("started_at")
   finishedAt      DateTime?    @map("finished_at")
