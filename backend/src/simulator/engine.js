@@ -160,15 +160,19 @@ async function tick(truckId) {
     });
 
     // Only create a new alert if no open alert of the same type exists for this box.
-    // Once the user acknowledges it, the next out-of-range reading will fire a new one.
+    // Natural readings (no forced offset): cap at 1 alert per route to avoid spam.
+    // Forced offsets from the simulator panel bypass the cap entirely.
+    const isForced = session.forcedTempOffset !== 0 || session.forcedHumOffset !== 0;
     const newAlerts = checkAlert(box, r);
     for (const a of newAlerts) {
       const key = `${box.id}:${a.type}`;
       if (openAlertKeys.has(key)) continue;
+      if (!isForced && session.naturalAlertFired) continue;
       const created = await prisma.alert.create({
         data: { boxId: box.id, ...a },
       });
       openAlertKeys.add(key); // prevent duplicates within the same tick
+      if (!isForced) session.naturalAlertFired = true;
       emit('alert:new', {
         id: created.id,
         boxId: box.id,
@@ -212,6 +216,7 @@ async function startRoute(routeId) {
     waypoints: route.waypoints,
     forcedTempOffset: 0,
     forcedHumOffset: 0,
+    naturalAlertFired: false, // cap: at most 1 natural alert per route lifecycle
     positionIntervalId: null,
     readingIntervalId: null,
   };
