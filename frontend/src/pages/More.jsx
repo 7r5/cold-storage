@@ -70,7 +70,7 @@ export default function More() {
 
       {/* Version + logout — separated from main nav */}
       <div className="space-y-2">
-        <p className="text-center text-xs text-slate-400">Cold Chain Control v0.1.0-poc</p>
+        <p className="text-center text-xs text-slate-400">Cold Chain Control v{__APP_VERSION__}</p>
 
         <button
           onClick={() => setConfirmLogout(true)}
