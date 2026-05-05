@@ -89,15 +89,21 @@ async function main() {
       boxes.push(
         await prisma.box.upsert({
           where: { code },
-          update: {},
+          update: {
+            // Widen range to ±6 °C around midpoint (-19 °C) so time-of-day
+            // variation rarely triggers alerts; only extreme peaks do.
+            targetTempMin: -25,
+            targetTempMax: -13,
+            targetHumMin: 58,
+            targetHumMax: 82,
+          },
           create: {
             code,
             truckId: tr.id,
-            // Cold chain spec: -20 to -18 °C, 60-80 % RH
-            targetTempMin: -20,
-            targetTempMax: -18,
-            targetHumMin: 60,
-            targetHumMax: 80,
+            targetTempMin: -25,
+            targetTempMax: -13,
+            targetHumMin: 58,
+            targetHumMax: 82,
           },
         }),
       );

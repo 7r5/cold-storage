@@ -30,20 +30,19 @@ describe('simulator helpers', () => {
 
   describe('generateReading', () => {
     const box = {
-      targetTempMin: -20,
-      targetTempMax: -18,
-      targetHumMin: 60,
-      targetHumMax: 80,
+      targetTempMin: -25,
+      targetTempMax: -13,
+      targetHumMin: 58,
+      targetHumMax: 82,
     };
 
     it('produces values near the midpoint without offset', () => {
-      // timeOfDayOffset() adds up to ±6 °C (±5 base + ±1 jitter) on top of the
-      // midpoint (-19 °C), so the plausible output range is [-26, -12].
+      // midpoint is -19 °C; timeOfDayOffset adds up to ±6.3 °C, so plausible range is [-27, -12].
       const r = generateReading(box);
       expect(r.temperature).toBeGreaterThan(-27);
       expect(r.temperature).toBeLessThan(-12);
-      expect(r.humidity).toBeGreaterThan(59);
-      expect(r.humidity).toBeLessThan(81);
+      expect(r.humidity).toBeGreaterThan(57);
+      expect(r.humidity).toBeLessThan(83);
     });
 
     it('shifts values when forced offsets are provided', () => {
@@ -55,10 +54,10 @@ describe('simulator helpers', () => {
 
   describe('checkAlert', () => {
     const box = {
-      targetTempMin: -20,
-      targetTempMax: -18,
-      targetHumMin: 60,
-      targetHumMax: 80,
+      targetTempMin: -25,
+      targetTempMax: -13,
+      targetHumMin: 58,
+      targetHumMax: 82,
     };
 
     it('no alerts when in range', () => {
