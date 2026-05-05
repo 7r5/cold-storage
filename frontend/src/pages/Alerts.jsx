@@ -62,26 +62,44 @@ function groupBy(alerts, getKey, allKeys) {
   return allKeys.map((k) => ({ label: k, value: counts[k] }));
 }
 
-const HOUR_KEYS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
-const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
-const DAY_KEYS = [0, 1, 2, 3, 4, 5, 6];
-
-function byHour(alerts) {
-  return groupBy(
-    alerts,
-    (a) => String(new Date(a.recordedAt).getHours()).padStart(2, '0'),
-    HOUR_KEYS,
-  ).filter((_, i) => i % 2 === 0 || alerts.some(
-    (a) => String(new Date(a.recordedAt).getHours()).padStart(2, '0') === HOUR_KEYS[i]
-  )); // show all 24 hours condensed
+// Local date string YYYY-MM-DD
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function byDay(alerts) {
+// Today's hours from 00 up to current hour
+function byHourToday(alerts) {
+  const now = new Date();
+  const todayStr = localDateStr(now);
+  const currentHour = now.getHours();
+  const keys = Array.from({ length: currentHour + 1 }, (_, i) => String(i).padStart(2, '0'));
+  const todayAlerts = alerts.filter((a) => localDateStr(new Date(a.recordedAt)) === todayStr);
   return groupBy(
-    alerts,
-    (a) => new Date(a.recordedAt).getDay(),
-    DAY_KEYS,
-  ).map((b) => ({ label: DAY_NAMES[b.label], value: b.value }));
+    todayAlerts,
+    (a) => String(new Date(a.recordedAt).getHours()).padStart(2, '0'),
+    keys,
+  );
+}
+
+// Today + last 7 calendar days with real date labels
+function byDate(alerts) {
+  const days = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = localDateStr(d);
+    const label = i === 0
+      ? 'Hoy'
+      : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }).replace(/\./g, '');
+    days.push({ dateStr, label });
+  }
+  const counts = {};
+  days.forEach(({ dateStr }) => { counts[dateStr] = 0; });
+  alerts.forEach((a) => {
+    const dateStr = localDateStr(new Date(a.recordedAt));
+    if (counts[dateStr] !== undefined) counts[dateStr]++;
+  });
+  return days.map(({ dateStr, label }) => ({ label, value: counts[dateStr] }));
 }
 
 // ── Alert card ─────────────────────────────────────────────────────
@@ -117,7 +135,6 @@ function AlertCard({ alert: a, onAck }) {
 }
 
 // ── Main page ──────────────────────────────────────────────────────
-const HISTORY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days for history tab
 
 export default function Alerts() {
   const [tab, setTab] = useState('activas'); // 'activas' | 'historial'
@@ -147,7 +164,9 @@ export default function Alerts() {
   useEffect(() => {
     if (tab !== 'historial' || historyLoaded) return;
     setLoadingHistory(true);
-    const since = new Date(Date.now() - HISTORY_MS).toISOString();
+    // start of day 7 days ago → covers today + last 7 full days
+    const _since = new Date(); _since.setDate(_since.getDate() - 7); _since.setHours(0, 0, 0, 0);
+    const since = _since.toISOString();
     api.get(`/api/alerts?limit=1000&since=${since}`)
       .then((data) => { setHistory(data); setHistoryLoaded(true); })
       .finally(() => setLoadingHistory(false));
@@ -159,8 +178,8 @@ export default function Alerts() {
     setHistoryLoaded(false);
   }
 
-  const hourData = useMemo(() => byHour(history), [history]);
-  const dayData  = useMemo(() => byDay(history),  [history]);
+  const hourData = useMemo(() => byHourToday(history), [history]);
+  const dateData = useMemo(() => byDate(history), [history]);
   const tempCount = useMemo(() => history.filter((a) => a.type === 'TEMP').length, [history]);
   const humCount  = useMemo(() => history.filter((a) => a.type === 'HUM').length,  [history]);
 
@@ -232,16 +251,16 @@ export default function Alerts() {
                 </div>
               ) : (
                 <>
-                  {/* By hour */}
+                  {/* By hour — today only */}
                   <div className="card space-y-2">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Por hora del dia</p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Hoy por hora (00:00 – ahora)</p>
                     <AlertBarChart data={hourData} color="#2563eb" />
                   </div>
 
-                  {/* By day of week */}
+                  {/* By date — today + last 7 days */}
                   <div className="card space-y-2">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Por dia de la semana</p>
-                    <AlertBarChart data={dayData} color="#0891b2" />
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Hoy + ultimos 7 dias</p>
+                    <AlertBarChart data={dateData} color="#0891b2" />
                   </div>
 
                   {/* Recent list */}
