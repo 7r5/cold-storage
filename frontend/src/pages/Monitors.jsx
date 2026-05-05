@@ -180,7 +180,7 @@ export default function Monitors() {
     <div className="flex flex-col gap-4 pb-20">
       {/* Header */}
       <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-100 mx-1">
-        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">
           Panel de Monitoreo
         </h2>
       </div>
@@ -190,7 +190,7 @@ export default function Monitors() {
         <div className="mx-1">
           <button
             onClick={() => setLockedRouteId(null)}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -333,17 +333,17 @@ export default function Monitors() {
               style={{ borderTopColor: color }}
             >
               {hasActiveAlert && !isCompleted && (
-                <div className="absolute -top-3 right-4 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded-full animate-bounce shadow-lg border-2 border-white uppercase">
+                <div className="absolute -top-3 right-4 bg-red-600 text-white text-[11px] font-black px-2 py-1 rounded-full animate-bounce shadow-lg border-2 border-white uppercase">
                   ⚠️ Alerta Activa
                 </div>
               )}
 
               <div className="flex justify-between items-start mb-3">
                 <div className="max-w-[70%]">
-                  <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
                     {isCompleted ? "Finalizado" : "En Tránsito"}
                   </h3>
-                  <p className="text-sm font-bold text-slate-800 leading-tight">
+                  <p className="text-base font-bold text-slate-800 leading-tight">
                     {r.originName.split(",")[0]} →{" "}
                     {r.destinationName.split(",")[0]}
                   </p>
@@ -352,7 +352,7 @@ export default function Monitors() {
                   <Link
                     to={truck ? `/camiones/${truck.id}` : "#"}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded font-mono font-bold hover:bg-slate-600 transition-colors"
+                    className="text-xs bg-slate-800 text-white px-2 py-0.5 rounded font-mono font-bold hover:bg-slate-600 transition-colors"
                   >
                     {truck?.plate || "S/N"}
                   </Link>
@@ -383,22 +383,22 @@ export default function Monitors() {
                         }`}
                       >
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-[8px] font-black text-slate-400 uppercase">
+                          <span className="text-[10px] font-black text-slate-400 uppercase">
                             {box.code}
                           </span>
                           {boxAlerts.length > 0 && (
-                            <span className="text-[8px] font-black text-red-600 uppercase">
+                            <span className="text-[10px] font-black text-red-600 uppercase">
                               ⚠ {boxAlerts.map((a) => a.type).join(" · ")}
                             </span>
                           )}
                         </div>
                         <div className="flex gap-4 justify-end">
                           <div className="text-right">
-                            <span className="block text-[8px] uppercase font-bold text-slate-400">
+                            <span className="block text-[10px] uppercase font-bold text-slate-400">
                               Temp
                             </span>
                             <span
-                              className={`text-xs font-mono font-black ${
+                              className={`text-sm font-mono font-black ${
                                 !tempOk ? "text-red-500" : "text-blue-600"
                               }`}
                             >
@@ -406,11 +406,11 @@ export default function Monitors() {
                             </span>
                           </div>
                           <div className="text-right border-l pl-3 border-slate-100">
-                            <span className="block text-[8px] uppercase font-bold text-slate-400">
+                            <span className="block text-[10px] uppercase font-bold text-slate-400">
                               Hum
                             </span>
                             <span
-                              className={`text-xs font-mono font-black ${
+                              className={`text-sm font-mono font-black ${
                                 !humOk ? "text-yellow-600" : "text-teal-600"
                               }`}
                             >
@@ -419,7 +419,7 @@ export default function Monitors() {
                           </div>
                         </div>
                         {boxAlerts.length > 0 && (
-                          <p className="text-[8px] text-red-500 mt-1 leading-tight">
+                          <p className="text-[10px] text-red-500 mt-1 leading-tight">
                             {boxAlerts[0].message}
                           </p>
                         )}
@@ -429,12 +429,12 @@ export default function Monitors() {
                 </div>
               )}
               {!isCompleted && (!truck?.boxes || truck.boxes.length === 0) && (
-                <p className="text-[10px] text-slate-400 mt-2 text-center">
+                <p className="text-xs text-slate-400 mt-2 text-center">
                   Sin cajas registradas
                 </p>
               )}
               <p
-                className={`text-[9px] font-bold mt-3 text-center uppercase tracking-tighter ${isSelected ? "text-blue-500" : "text-slate-400"}`}
+                className={`text-[11px] font-bold mt-3 text-center uppercase tracking-tighter ${isSelected ? "text-blue-500" : "text-slate-400"}`}
               >
                 {isSelected ? "Ocultar ruta · soltar cámara" : "Ver ruta · seguir camión"}
               </p>
