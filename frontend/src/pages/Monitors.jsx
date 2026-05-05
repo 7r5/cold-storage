@@ -8,6 +8,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { getSocket } from "../api/socket";
 
@@ -120,12 +121,19 @@ export default function Monitors() {
       }));
     };
 
+    // When a new alert fires, refresh routes so the alert badge updates immediately
+    const onAlert = () => {
+      api.get("/api/routes").then(setRoutes).catch(() => {});
+    };
+
     socket.on("truck:position", onPos);
     socket.on("box:reading", onReading);
+    socket.on("alert:new", onAlert);
 
     return () => {
       socket.off("truck:position", onPos);
       socket.off("box:reading", onReading);
+      socket.off("alert:new", onAlert);
     };
   }, []);
 
@@ -276,55 +284,89 @@ export default function Monitors() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded font-mono font-bold">
+                  <Link
+                    to={truck ? `/camiones/${truck.id}` : "#"}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded font-mono font-bold hover:bg-slate-600 transition-colors"
+                  >
                     {truck?.plate || "S/N"}
-                  </span>
+                  </Link>
                 </div>
               </div>
 
-              {!isCompleted && truck?.boxes && (
+              {!isCompleted && truck?.boxes && truck.boxes.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   {truck.boxes.map((box) => {
                     const data = liveReadings[String(box.id)];
-                    const isHot = data?.temperature > -18;
+                    const tempOk =
+                      data == null ||
+                      (data.temperature >= box.targetTempMin &&
+                        data.temperature <= box.targetTempMax);
+                    const humOk =
+                      data == null ||
+                      (data.humidity >= box.targetHumMin &&
+                        data.humidity <= box.targetHumMax);
+                    const boxAlerts = box.alerts || [];
 
                     return (
                       <div
                         key={box.id}
-                        className="bg-white border border-slate-100 p-2 rounded-lg flex justify-between items-center shadow-sm"
+                        className={`border p-2 rounded-lg shadow-sm ${
+                          boxAlerts.length > 0
+                            ? "bg-red-50 border-red-200"
+                            : "bg-white border-slate-100"
+                        }`}
                       >
-                        <div className="flex flex-col">
-                          <span className="text-[8px] font-black text-slate-400 uppercase leading-none mb-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[8px] font-black text-slate-400 uppercase">
                             {box.code}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-600">
-                            Sensor OK
-                          </span>
+                          {boxAlerts.length > 0 && (
+                            <span className="text-[8px] font-black text-red-600 uppercase">
+                              ⚠ {boxAlerts.map((a) => a.type).join(" · ")}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 justify-end">
                           <div className="text-right">
                             <span className="block text-[8px] uppercase font-bold text-slate-400">
                               Temp
                             </span>
                             <span
-                              className={`text-xs font-mono font-black ${isHot ? "text-red-500" : "text-blue-600"}`}
+                              className={`text-xs font-mono font-black ${
+                                !tempOk ? "text-red-500" : "text-blue-600"
+                              }`}
                             >
-                              {data ? `${data.temperature.toFixed(1)}°C` : "--"}
+                              {data ? `${data.temperature.toFixed(1)}°C` : "—"}
                             </span>
                           </div>
                           <div className="text-right border-l pl-3 border-slate-100">
                             <span className="block text-[8px] uppercase font-bold text-slate-400">
                               Hum
                             </span>
-                            <span className="text-xs font-mono font-black text-slate-700">
-                              {data ? `${Math.round(data.humidity)}%` : "--"}
+                            <span
+                              className={`text-xs font-mono font-black ${
+                                !humOk ? "text-yellow-600" : "text-teal-600"
+                              }`}
+                            >
+                              {data ? `${Math.round(data.humidity)}%` : "—"}
                             </span>
                           </div>
                         </div>
+                        {boxAlerts.length > 0 && (
+                          <p className="text-[8px] text-red-500 mt-1 leading-tight">
+                            {boxAlerts[0].message}
+                          </p>
+                        )}
                       </div>
                     );
                   })}
                 </div>
+              )}
+              {!isCompleted && (!truck?.boxes || truck.boxes.length === 0) && (
+                <p className="text-[10px] text-slate-400 mt-2 text-center">
+                  Sin cajas registradas
+                </p>
               )}
               <p
                 className={`text-[9px] font-bold mt-3 text-center uppercase tracking-tighter ${isSelected ? "text-blue-500" : "text-slate-400"}`}
