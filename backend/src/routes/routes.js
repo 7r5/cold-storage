@@ -5,9 +5,10 @@ const prisma = require('../db');
 const router = express.Router();
 
 /**
- * GET /api/routes/live-history 
- * Recupera las posiciones de todos los camiones generadas hoy.
- * Esto evita que el mapa se limpie al recargar la página o navegar.
+ * GET /api/routes/live-history
+ * Returns today's recorded positions grouped by routeId.
+ * Keying by routeId (not truckId) prevents mixing points from different
+ * routes of the same truck, which would cause wrong polylines on the map.
  */
 router.get('/live-history', async (_req, res) => {
   try {
@@ -16,20 +17,17 @@ router.get('/live-history', async (_req, res) => {
 
     const positions = await prisma.position.findMany({
       where: {
-        // CAMBIO: Usamos recordedAt en lugar de createdAt
-        recordedAt: {
-          gte: todayStart,
-        },
+        recordedAt: { gte: todayStart },
+        routeId: { not: null },
       },
-      orderBy: { 
-        recordedAt: 'asc' // CAMBIO: También aquí para el orden
-      },
+      orderBy: { recordedAt: 'asc' },
     });
 
+    // Group by routeId so each route gets its own ordered array of [lat, lng]
     const history = positions.reduce((acc, pos) => {
-      const tid = String(pos.truckId);
-      if (!acc[tid]) acc[tid] = [];
-      acc[tid].push([pos.lat, pos.lng]); 
+      const rid = String(pos.routeId);
+      if (!acc[rid]) acc[rid] = [];
+      acc[rid].push([pos.lat, pos.lng]);
       return acc;
     }, {});
 
