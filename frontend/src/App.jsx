@@ -10,6 +10,7 @@ import Inventory from './pages/Inventory';
 import Alerts from './pages/Alerts';
 import More from './pages/More';
 import Root from './pages/Root';
+import TruckDetail from './pages/TruckDetail';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/inventario" element={<Inventory />} />
         <Route path="/alertas" element={<Alerts />} />
         <Route path="/mas" element={<More />} />
+        <Route path="/camiones/:id" element={<TruckDetail />} />
         <Route
           path="/root"
           element={
