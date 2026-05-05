@@ -12,6 +12,7 @@ export default function More() {
   }
 
   const items = [
+    { label: 'Rutas', to: '/rutas', desc: 'Registrar y administrar rutas' },
     { label: 'Ajustes', to: '#', desc: 'Preferencias de la cuenta' },
     { label: '¿Necesitas ayuda?', to: '#', desc: 'Contacto y soporte' },
     { label: 'Acerca de', to: '#', desc: 'Versión y créditos' },

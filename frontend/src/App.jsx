@@ -11,6 +11,8 @@ import Alerts from './pages/Alerts';
 import More from './pages/More';
 import Root from './pages/Root';
 import TruckDetail from './pages/TruckDetail';
+import Rutas from './pages/Rutas';
+import NuevaRuta from './pages/NuevaRuta';
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
         <Route path="/alertas" element={<Alerts />} />
         <Route path="/mas" element={<More />} />
         <Route path="/camiones/:id" element={<TruckDetail />} />
+        <Route path="/rutas" element={<Rutas />} />
+        <Route path="/rutas/nueva" element={<NuevaRuta />} />
         <Route
           path="/root"
           element={

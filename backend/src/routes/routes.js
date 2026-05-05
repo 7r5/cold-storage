@@ -98,4 +98,72 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/routes
+ * Creates a new planned route with a truck assignment and waypoints.
+ * Waypoints must be an array of [lng, lat] pairs (GeoJSON order).
+ */
+router.post('/', async (req, res) => {
+  const { truckId, originName, destinationName, waypoints } = req.body;
+
+  if (!truckId || !originName || !destinationName || !waypoints) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: truckId, originName, destinationName, waypoints' });
+  }
+
+  const tid = parseInt(truckId, 10);
+  if (isNaN(tid)) return res.status(400).json({ error: 'truckId debe ser un número' });
+
+  if (
+    !Array.isArray(waypoints) ||
+    waypoints.length < 2 ||
+    !waypoints.every((p) => Array.isArray(p) && p.length === 2 && waypoints.every(() => true))
+  ) {
+    return res.status(400).json({ error: 'waypoints debe ser un array de al menos 2 pares [lng, lat]' });
+  }
+
+  try {
+    const truck = await prisma.truck.findUnique({ where: { id: tid } });
+    if (!truck) return res.status(404).json({ error: 'Camión no encontrado' });
+
+    const route = await prisma.route.create({
+      data: {
+        truckId: tid,
+        originName: String(originName).trim(),
+        destinationName: String(destinationName).trim(),
+        waypoints,
+        status: 'PENDING',
+      },
+      include: { truck: { select: { id: true, plate: true } } },
+    });
+
+    res.status(201).json(route);
+  } catch (error) {
+    console.error('Error al crear ruta:', error);
+    res.status(500).json({ error: 'Error al crear la ruta' });
+  }
+});
+
+/**
+ * DELETE /api/routes/:id
+ * Deletes a route. Only PENDING routes can be deleted.
+ */
+router.delete('/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
+  try {
+    const route = await prisma.route.findUnique({ where: { id } });
+    if (!route) return res.status(404).json({ error: 'Ruta no encontrada' });
+    if (route.status !== 'PENDING') {
+      return res.status(409).json({ error: 'Solo se pueden eliminar rutas en estado PENDING' });
+    }
+
+    await prisma.route.delete({ where: { id } });
+    res.status(204).end();
+  } catch (error) {
+    console.error('Error al eliminar ruta:', error);
+    res.status(500).json({ error: 'Error al eliminar la ruta' });
+  }
+});
+
 module.exports = router;

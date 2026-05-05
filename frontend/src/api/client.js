@@ -30,6 +30,7 @@ export const api = {
   baseUrl: BASE_URL,
   get: (p) => request(p),
   post: (p, body) => request(p, { method: 'POST', body }),
+  delete: (p) => request(p, { method: 'DELETE' }),
   // Public (no auth header)
   postPublic: (p, body) => request(p, { method: 'POST', body, auth: false }),
 };
