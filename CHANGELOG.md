@@ -6,7 +6,23 @@ Todas las versiones notables de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
+## [0.3.4] — 2026-05-05
 
+### Added
+- Monitores: animación del marcador a 60 fps via `requestAnimationFrame` + `marker.setLatLng()` — movimiento completamente fluido entre ticks GPS.
+- Home: barra de progreso en tiempo real para rutas activas (origen → XX% → destino), actualizada por socket.
+- Home: badge de alerta ámbar por camión, nombre del conductor como texto principal, chips de resumen en 3 columnas.
+- Alertas historial: gráfica por hora muestra solo hoy (00:00 a hora actual); gráfica por fecha muestra hoy + 7 días reales.
+
+### Fixed
+- Monitores: label de estado ahora dice "En Tránsito" / "Inactivo" (eliminado Pendiente/Finalizado).
+- Monitores: escucha `route:stopped` para actualizar tarjetas en tiempo real sin recargar.
+- Splash screen: fondo blanco para que el logo no se mezcle con fondo oscuro.
+
+### Docs
+- Documentación: añadidas entidades Driver, BranchStock, Bug, Faq; rangos actualizados; flujo de simulación corregido; eventos Socket.IO documentados.
+
+---
 ## [0.3.2] — 2026-05-05
 
 ### Fixed
