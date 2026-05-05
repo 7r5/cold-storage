@@ -94,8 +94,20 @@ export default function Documentacion() {
           <Field name="id" type="Int" desc="Identificador único." />
           <Field name="plate" type="String" required desc="Placa del vehículo — única en el sistema." />
           <Field name="model" type="String" required desc="Modelo del camión (ej. Volvo FH16)." />
-          <Field name="driverName" type="String" required desc="Nombre del conductor asignado." />
+          <Field name="driverName" type="String" required desc="Nombre corto del conductor (display). Para datos completos ver Driver." />
+          <Field name="driverId" type="Int?" desc="FK al registro Driver con licencia y teléfono." />
           <Field name="status" type="TruckStatus" desc="IDLE, ON_ROUTE o MAINTENANCE. Se actualiza automáticamente al iniciar/terminar simulación." />
+        </div>
+      </Section>
+
+      <Section title="Entidades — Driver (Conductor)">
+        <p className="text-xs text-slate-500">Conductor profesional asignado a un camión.</p>
+        <div className="space-y-0.5">
+          <Field name="id" type="Int" desc="Identificador único." />
+          <Field name="firstName" type="String" required desc="Nombre(s) del conductor." />
+          <Field name="lastName" type="String" required desc="Apellidos del conductor." />
+          <Field name="licenseNumber" type="String" required desc="Número de licencia — único en el sistema." />
+          <Field name="phone" type="String?" desc="Teléfono de contacto." />
         </div>
       </Section>
 
@@ -105,10 +117,10 @@ export default function Documentacion() {
           <Field name="id" type="Int" desc="Identificador único." />
           <Field name="code" type="String" required desc="Código identificador único (ej. UKG-001-B1)." />
           <Field name="truckId" type="Int" required desc="FK al camión que porta esta caja." />
-          <Field name="targetTempMin" type="Float" required desc="Temperatura mínima aceptable (°C). Debajo = alerta TEMP." />
-          <Field name="targetTempMax" type="Float" required desc="Temperatura máxima aceptable (°C). Arriba = alerta TEMP." />
-          <Field name="targetHumMin" type="Float" required desc="Humedad relativa mínima aceptable (%). Debajo = alerta HUM." />
-          <Field name="targetHumMax" type="Float" required desc="Humedad relativa máxima aceptable (%). Arriba = alerta HUM." />
+          <Field name="targetTempMin" type="Float" required desc="Temperatura mínima aceptable (°C). Default seed: −25 °C." />
+          <Field name="targetTempMax" type="Float" required desc="Temperatura máxima aceptable (°C). Default seed: −13 °C." />
+          <Field name="targetHumMin" type="Float" required desc="Humedad relativa mínima aceptable (%). Default seed: 58 %." />
+          <Field name="targetHumMax" type="Float" required desc="Humedad relativa máxima aceptable (%). Default seed: 82 %." />
         </div>
       </Section>
 
@@ -186,6 +198,19 @@ export default function Documentacion() {
         </div>
       </Section>
 
+      <Section title="Entidades — BranchStock (Inventario de Sucursal)">
+        <p className="text-xs text-slate-500">Cantidad disponible de un producto en una sucursal específica. No está vinculado a rutas ni camiones — es el inventario en sitio.</p>
+        <div className="space-y-0.5">
+          <Field name="id" type="Int" desc="Identificador único." />
+          <Field name="branchId" type="Int" required desc="FK a la sucursal." />
+          <Field name="productId" type="Int" required desc="FK al producto." />
+          <Field name="quantity" type="Float" required desc="Cantidad en stock." />
+          <Field name="unit" type="String" required desc="Unidad de medida (ej. unidades, dosis, kg). Default: units." />
+          <Field name="updatedAt" type="DateTime" desc="Timestamp de última actualización." />
+        </div>
+        <p className="text-xs text-slate-400">Restricción única: (branchId, productId) — un producto tiene un solo registro por sucursal.</p>
+      </Section>
+
       <Section title="Entidades — BoxLoad (Carga)">
         <p className="text-xs text-slate-500">Registro de qué producto, en qué cantidad, viajó en qué caja durante qué ruta. Pivote entre Box, Product y Route.</p>
         <div className="space-y-0.5">
@@ -198,9 +223,33 @@ export default function Documentacion() {
         <p className="text-xs text-slate-400">Restricción única: (boxId, productId, routeId) — no se puede duplicar la misma carga en el mismo viaje.</p>
       </Section>
 
+      <Section title="Entidades — Bug (Reporte de error)">
+        <p className="text-xs text-slate-500">Reporte de error enviado por cualquier usuario desde la app.</p>
+        <div className="space-y-0.5">
+          <Field name="id" type="Int" desc="Identificador único." />
+          <Field name="title" type="String" required desc="Título breve del error." />
+          <Field name="location" type="String" required desc="Pantalla o sección donde ocurre." />
+          <Field name="expected" type="String" required desc="Comportamiento esperado." />
+          <Field name="actual" type="String" required desc="Comportamiento observado." />
+          <Field name="status" type="BugStatus" desc="OPEN, IN_PROGRESS o CLOSED." />
+          <Field name="reportedBy" type="String?" desc="Username de quien reportó." />
+        </div>
+      </Section>
+
+      <Section title="Entidades — Faq (Pregunta frecuente)">
+        <p className="text-xs text-slate-500">Entrada de preguntas frecuentes mostradas en la pantalla de Ayuda.</p>
+        <div className="space-y-0.5">
+          <Field name="id" type="Int" desc="Identificador único." />
+          <Field name="question" type="String" required desc="Pregunta." />
+          <Field name="answer" type="String" required desc="Respuesta (texto largo)." />
+          <Field name="order" type="Int" desc="Orden de aparición en la lista." />
+        </div>
+      </Section>
+
       {/* Relationships */}
       <Section title="Relaciones entre entidades">
         <div className="space-y-2">
+          <Rel from="Truck" to="Driver" desc="Un camión tiene un conductor asignado (opcional, FK a Driver)." />
           <Rel from="Truck" to="Box[]" desc="Un camión tiene una o más cajas refrigeradas." />
           <Rel from="Truck" to="Route[]" desc="Un camión puede tener muchas rutas (historial de viajes)." />
           <Rel from="Route" to="Truck" desc="Cada ruta está asignada a exactamente un camión." />
@@ -212,6 +261,7 @@ export default function Documentacion() {
           <Rel from="Reading" to="Route" desc="Cada lectura recuerda en qué ruta se generó (trazabilidad)." />
           <Rel from="Position" to="Truck + Route" desc="Cada posición GPS registra el camión y la ruta activa para separar las trazas en el mapa." />
           <Rel from="BoxLoad" to="Box + Product + Route" desc="Tabla pivot: relaciona caja, producto y viaje en un solo registro." />
+          <Rel from="BranchStock" to="Branch + Product" desc="Inventario en sitio: cantidad de un producto en una sucursal (independiente de rutas)." />
         </div>
       </Section>
 
@@ -221,14 +271,15 @@ export default function Documentacion() {
           {[
             'Un administrador (ROOT) crea una ruta con waypoints desde "Más → Rutas → Nueva ruta".',
             'Desde el "Panel de simulación" presiona "Simular ruta" en la ruta deseada.',
-            'El motor del simulador (engine.js) interpola los waypoints y emite posiciones cada 5 segundos por Socket.IO.',
-            'Al mismo tiempo genera lecturas de temperatura/humedad para cada caja del camión.',
-            'Si una lectura está fuera del rango objetivo de la caja, se crea una alerta (deduplicada: 1 alerta abierta por caja+tipo).',
-            'El mapa en Monitores muestra la posición en tiempo real. Las tarjetas de ruta muestran los últimos valores de los sensores.',
-            'Al completarse la ruta (2 minutos), el estado cambia a COMPLETED y el camión regresa a IDLE.',
+            'El motor del simulador (engine.js) interpola los waypoints y emite posiciones GPS cada 1 segundo por Socket.IO (120 puntos por ruta de 2 minutos).',
+            'Al mismo tiempo genera lecturas de temperatura/humedad para cada caja del camión cada 5 segundos.',
+            'El simulador aplica una variación de temperatura basada en la hora del día (curva coseno ±5 °C, pico 14:00, mínimo 02:00) con jitter aleatorio de ±1 °C.',
+            'Si una lectura está fuera del rango objetivo de la caja, se crea una alerta (deduplicada: máximo 1 alerta natural abierta por caja+tipo por ciclo de ruta).',
+            'El mapa en Monitores muestra el marcador del camión con interpolación a 60 fps (requestAnimationFrame). Las tarjetas muestran los últimos valores de sensores.',
+            'Al completarse la ruta (≈2 minutos), el estado cambia a COMPLETED y el camión regresa a IDLE. El evento route:stopped actualiza la UI en tiempo real.',
           ].map((step, i) => (
             <li key={i} className="flex gap-2 text-sm text-slate-700">
-              <span className="shrink-0 w-5 h-5 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+              <span className="shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
               <span>{step}</span>
             </li>
           ))}
@@ -240,19 +291,27 @@ export default function Documentacion() {
         <div className="space-y-2">
           <div>
             <p className="text-xs font-semibold text-slate-700 mb-1">Coordenadas</p>
-            <p className="text-xs text-slate-600">Los waypoints se almacenan como <code className="font-mono">[lng, lat]</code> (orden GeoJSON). El motor los convierte a <code className="font-mono">[lat, lng]</code> para Leaflet. Los sockets emiten <code className="font-mono">{'{ lat, lng }'}</code>.</p>
+            <p className="text-xs text-slate-600">Los waypoints se almacenan como <code className="font-mono">[lng, lat]</code> (orden GeoJSON / Mapbox). El motor los convierte a <code className="font-mono">[lat, lng]</code> para Leaflet. Los sockets emiten <code className="font-mono">{'{ lat, lng }'}</code> ya en orden Leaflet.</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-700 mb-1">Animación del marcador</p>
+            <p className="text-xs text-slate-600">El dot del camión en el mapa se mueve con interpolación ease-in-out a 60 fps via <code className="font-mono">requestAnimationFrame</code> + <code className="font-mono">marker.setLatLng()</code> de Leaflet directo — sin pasar por React state, evitando re-renders.</p>
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-700 mb-1">Autenticación</p>
-            <p className="text-xs text-slate-600">Tokens dummy codificados en base64. Sin JWT ni cifrado. Válido solo para POC.</p>
+            <p className="text-xs text-slate-600">Tokens dummy codificados en base64. Sin JWT ni cifrado. Válido solo para POC. Todo endpoint protegido requiere header <code className="font-mono">Authorization: Bearer &lt;token&gt;</code>.</p>
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-700 mb-1">Base de datos</p>
-            <p className="text-xs text-slate-600">PostgreSQL + Prisma. Las migraciones se aplican con <code className="font-mono">prisma db push</code> automáticamente en cada deploy a Render.</p>
+            <p className="text-xs text-slate-600">PostgreSQL + Prisma 5. Las migraciones se aplican con <code className="font-mono">prisma db push</code> automáticamente en cada deploy a Render. El seed es idempotente (upsert).</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-700 mb-1">Socket.IO — eventos principales</p>
+            <p className="text-xs text-slate-600"><code className="font-mono">truck:position</code> · <code className="font-mono">box:reading</code> · <code className="font-mono">alert:new</code> · <code className="font-mono">route:started</code> · <code className="font-mono">route:stopped</code></p>
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-700 mb-1">Idiomas</p>
-            <p className="text-xs text-slate-600">La interfaz de usuario está en español. El código fuente, comentarios y la base de datos están en inglés.</p>
+            <p className="text-xs text-slate-600">La interfaz de usuario está en español. El código fuente, comentarios, nombres de rutas API y columnas de DB están en inglés.</p>
           </div>
         </div>
       </Section>
