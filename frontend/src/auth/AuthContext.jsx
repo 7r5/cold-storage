@@ -25,6 +25,12 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem(STORAGE_KEY);
   }, [user]);
 
+  // Refresh profile from API on mount so phone/age/position are always current
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    api.get('/api/auth/me').then((fresh) => setUser(fresh)).catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const login = useCallback(async (username, password) => {
     setLoading(true);
     setError(null);
