@@ -9,7 +9,7 @@ const prisma = require('../db');
 
 // Tunables
 const TICK_MS = 5000;            // emit positions/readings every 5s
-const ROUTE_DURATION_MS = 60_000; // 60s to traverse a route (demo speed)
+const ROUTE_DURATION_MS = 120_000; // 120s to traverse a route (demo speed)
 
 // State per trucking session
 const activeTrucks = new Map();
@@ -110,10 +110,19 @@ async function tick(truckId) {
 
   // Readings for every box of the truck
   const boxes = await prisma.box.findMany({ where: { truckId } });
+
+  // Load all open (unacknowledged) alerts for this truck's boxes in one query.
+  // Used to suppress duplicate alerts: only one open alert per box+type at a time.
+  const openAlerts = await prisma.alert.findMany({
+    where: { box: { truckId }, acknowledged: false },
+    select: { boxId: true, type: true },
+  });
+  const openAlertKeys = new Set(openAlerts.map((a) => `${a.boxId}:${a.type}`));
+
   for (const box of boxes) {
     const r = generateReading(box, session.forcedTempOffset, session.forcedHumOffset);
     const saved = await prisma.reading.create({
-      data: { boxId: box.id, temperature: r.temperature, humidity: r.humidity },
+      data: { boxId: box.id, routeId: session.routeId, temperature: r.temperature, humidity: r.humidity },
     });
     emit('box:reading', {
       boxId: box.id,
@@ -123,12 +132,16 @@ async function tick(truckId) {
       recordedAt: saved.recordedAt,
     });
 
-    // Check alerts
+    // Only create a new alert if no open alert of the same type exists for this box.
+    // Once the user acknowledges it, the next out-of-range reading will fire a new one.
     const newAlerts = checkAlert(box, r);
     for (const a of newAlerts) {
+      const key = `${box.id}:${a.type}`;
+      if (openAlertKeys.has(key)) continue;
       const created = await prisma.alert.create({
         data: { boxId: box.id, ...a },
       });
+      openAlertKeys.add(key); // prevent duplicates within the same tick
       emit('alert:new', {
         id: created.id,
         boxId: box.id,
