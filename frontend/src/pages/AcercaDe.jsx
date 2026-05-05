@@ -13,59 +13,8 @@ const STACK = [
   { layer: 'Ruteo', tech: 'OSRM (Project OSRM)' },
 ];
 
-const CHANGELOG = [
-  {
-    version: 'Unreleased',
-    date: '2026-05-04',
-    added: [
-      'PWA: manifest, service worker e íconos para instalación en Android/iOS.',
-      'Variación de temperatura por hora del día en el simulador (±5 °C, pico 14:00).',
-      'Botón de atrás de Android: navega en la app; doble pulsación en tabs raíz para salir.',
-      'Créditos "7r5 Studios" y link al repositorio en esta pantalla.',
-      'Botón de volver en página Rutas (faltaba).',
-    ],
-    fixed: [
-      'Botón de volver en páginas de Más: área clickeable incluye ícono y título.',
-    ],
-  },
-  {
-    version: '0.1.2',
-    date: '2026-05-04',
-    added: [
-      'GET /api/auth/me — perfil fresco al arrancar la app.',
-    ],
-    fixed: [
-      'Teléfono, edad y puesto no se mostraban en Ajustes por datos stale en localStorage.',
-    ],
-  },
-  {
-    version: '0.1.1',
-    date: '2026-05-04',
-    added: [
-      'Versión semver + git hash inyectada en build time (ej. 0.1.1+a525160).',
-      'Scripts de release: release:patch, release:minor, release:major.',
-      'Tarjetas de monitor ordenadas: Activa → Pendiente → Completada.',
-      'CameraLock: el mapa sigue al camión seleccionado sin cambiar el zoom.',
-      'Botón "Desbloquear cámara" para uso manual del mapa.',
-    ],
-    fixed: [
-      'Mapa mostraba ruta completa al reiniciar simulación (posiciones stale en DB y en cliente).',
-      'Ruta duplicada en cada deploy por originName inconsistente en seed.',
-    ],
-  },
-  {
-    version: '0.1.0',
-    date: '2026-05-04',
-    added: [
-      'API REST completa: auth, trucks, boxes, routes, simulator, alerts, inventory, bugs, FAQ.',
-      'Simulador en memoria con interpolación de waypoints, lecturas y alertas automáticas.',
-      'Todas las pantallas: Home, Monitores, Inventario, Alertas, Más, TruckDetail, Rutas, Ajustes, Ayuda, AcercaDe, Documentación, Bugs, Root.',
-      'Mapa en tiempo real con polilínea por ruta, marcador de camión y pantalla completa.',
-      'Página NuevaRuta con geocodificación (Nominatim) y trazado de ruta (OSRM).',
-      'Cobertura de tests ≥ 90% (71 backend, 98 frontend).',
-    ],
-  },
-];
+// Injected at build time from CHANGELOG.md by vite.config.js
+const CHANGELOG = __CHANGELOG__;
 
 export default function AcercaDe() {
 
