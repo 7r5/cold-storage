@@ -105,8 +105,8 @@ async function tick(truckId) {
 
   // Persist + emit position
   // lat guardará ~20.5 y lng guardará ~-100.4
-  await prisma.position.create({ data: { truckId, lat, lng } });
-  emit('truck:position', { truckId, lat, lng, progress });
+  await prisma.position.create({ data: { truckId, routeId: session.routeId, lat, lng } });
+  emit('truck:position', { truckId, routeId: session.routeId, lat, lng, progress });
 
   // Readings for every box of the truck
   const boxes = await prisma.box.findMany({ where: { truckId } });
