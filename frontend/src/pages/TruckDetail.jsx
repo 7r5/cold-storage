@@ -276,7 +276,7 @@ function BoxCard({ box, readings }) {
       <div className="grid grid-cols-2 gap-2">
         <div className={`p-3 rounded-xl border ${tempOk ? "border-slate-100 bg-slate-50" : "border-red-200 bg-red-50"}`}>
           <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Temperatura</p>
-              className={`text-3xl font-black font-mono ${tempOk ? "text-violet-600" : "text-red-500"}`}>
+          <p className={`text-3xl font-black font-mono ${tempOk ? "text-violet-600" : "text-red-500"}`}>
             {last ? `${last.temperature.toFixed(1)}°` : "—"}
           </p>
           <p className="text-xs text-slate-400">°C</p>
@@ -360,7 +360,7 @@ function BoxCard({ box, readings }) {
                           hour: "2-digit", minute: "2-digit",
                         })}
                       </td>
-                      <td className={`py-1.5 px-2 text-right font-mono font-bold tabular-nums ${tOk ? "text-blue-600" : "text-red-500"}`}>
+                      <td className={`py-1.5 px-2 text-right font-mono font-bold tabular-nums ${tOk ? "text-violet-600" : "text-red-500"}`}>
                         {r.temperature.toFixed(2)}
                       </td>
                       <td className={`py-1.5 px-2 text-right font-mono tabular-nums ${hOk ? "text-teal-600" : "text-yellow-600"}`}>
