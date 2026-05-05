@@ -88,6 +88,7 @@ model Route {
   destinationBranch  Branch?   @relation("RouteDestination", fields: [destinationBranchId], references: [id])
   loads              BoxLoad[]
   readings           Reading[]
+  positions          Position[]
 
   @@map("routes")
 }
@@ -102,13 +103,16 @@ enum RouteStatus {
 model Position {
   id         Int      @id @default(autoincrement())
   truckId    Int      @map("truck_id")
+  routeId    Int?     @map("route_id")
   lat        Float
   lng        Float
   recordedAt DateTime @default(now()) @map("recorded_at")
 
-  truck Truck @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  truck Truck  @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  route Route? @relation(fields: [routeId], references: [id], onDelete: SetNull)
 
   @@index([truckId, recordedAt])
+  @@index([routeId])
   @@map("positions")
 }
 
