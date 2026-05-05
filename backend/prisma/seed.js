@@ -55,26 +55,28 @@ async function main() {
 
   // Trucks
   const trucksData = [
-    { plate: "UKG-001", model: "Volvo FH16", driverName: "Pepe Papas." },
-    { plate: "ADF-002", model: "Scania R450", driverName: "Ricardo A." },
-    { plate: "JFK-003", model: "Mercedes Actros", driverName: "Andres B." },
+    { plate: "UKG-001", model: "Volvo FH16",        driverName: "Pepe Papas.",  boxes: 2 },
+    { plate: "ADF-002", model: "Scania R450",        driverName: "Ricardo A.",  boxes: 1 },
+    { plate: "JFK-003", model: "Mercedes Actros",    driverName: "Andres B.",   boxes: 2 },
   ];
 
   const trucks = [];
   for (const t of trucksData) {
+    const { boxes: boxCount, ...truckFields } = t;
     trucks.push(
       await prisma.truck.upsert({
-        where: { plate: t.plate },
+        where: { plate: truckFields.plate },
         update: {},
-        create: t,
+        create: truckFields,
       }),
     );
+    trucks[trucks.length - 1]._boxCount = boxCount;
   }
 
-  // Two boxes per truck
+  // Variable boxes per truck
   const boxes = [];
   for (const tr of trucks) {
-    for (let i = 1; i <= 2; i++) {
+    for (let i = 1; i <= (tr._boxCount ?? 2); i++) {
       const code = `${tr.plate}-B${i}`;
       boxes.push(
         await prisma.box.upsert({
