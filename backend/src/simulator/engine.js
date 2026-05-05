@@ -1,3 +1,4 @@
+// engine.js
 // In-memory simulation engine.
 // - Advances trucks along their route waypoints (linear interpolation).
 // - Generates periodic temperature/humidity readings for each box.
@@ -11,8 +12,6 @@ const TICK_MS = 5000;            // emit positions/readings every 5s
 const ROUTE_DURATION_MS = 60_000; // 60s to traverse a route (demo speed)
 
 // State per trucking session
-// Map<truckId, { routeId, startedAt, durationMs, waypoints, intervalId,
-//                forcedTempOffset, forcedHumOffset }>
 const activeTrucks = new Map();
 
 let io = null;
@@ -25,27 +24,41 @@ function emit(event, payload) {
   if (io) io.emit(event, payload);
 }
 
-// Linear interpolation along an array of waypoints based on progress 0..1
+/**
+ * INTERPOLACIÓN CORREGIDA
+ * Recibe waypoints como vienen de tu DB/Copy-paste: [longitud, latitud]
+ * Retorna siempre un arreglo [latitud, longitud] para consistencia en el guardado.
+ */
 function interpolate(waypoints, progress) {
-  if (progress <= 0) return waypoints[0];
-  if (progress >= 1) return waypoints[waypoints.length - 1];
-  const segments = waypoints.length - 1;
-  const scaled = progress * segments;
-  const idx = Math.floor(scaled);
-  const t = scaled - idx;
-  // If wayponts contain 3 coordinates, ignore the zoom for interpolation
-  const [lngtemp, lattemp] = waypoints[idx];
-  let [lng1, lat1]
-  let [lng2, lat2]
-  // in case the order is lat,lng instead of lng,lat, detect it and swap accordingly
-  if (lngtemp > lattemp) {
-      [lng1, lat1] = waypoints[idx];
-      [lng2, lat2] = waypoints[idx + 1];
-  }else{
-    [lat1, lng1] = waypoints[idx];
-    [lat2, lng2] = waypoints[idx + 1];
+  if (!waypoints || waypoints.length === 0) return [0, 0];
+  
+  // Caso: Inicio de la ruta
+  if (progress <= 0) {
+    const [lng, lat] = waypoints[0];
+    return [lat, lng]; 
   }
-  return [lat1 + (lat2 - lat1) * t, lng1 + (lng2 - lng1) * t];
+
+  // Caso: Fin de la ruta (Corrige el error de inversión al final)
+  if (progress >= 1) {
+    const [lng, lat] = waypoints[waypoints.length - 1];
+    return [lat, lng]; 
+  }
+
+  const segments = waypoints.length - 1;
+  const scaledProgress = progress * segments;
+  const idx = Math.floor(scaledProgress);
+  const t = scaledProgress - idx;
+
+  // Extraemos los puntos del copy-paste [lng, lat]
+  const [lng1, lat1] = waypoints[idx];
+  const [lng2, lat2] = waypoints[idx + 1];
+
+  // Cálculo de la posición intermedia
+  const interLat = lat1 + (lat2 - lat1) * t;
+  const interLng = lng1 + (lng2 - lng1) * t;
+
+  // Retornamos [Latitud, Longitud] para que la desestructuración en tick() sea correcta
+  return [interLat, interLng]; 
 }
 
 // Generate a noisy reading around the box target range
@@ -86,9 +99,12 @@ async function tick(truckId) {
 
   const elapsed = Date.now() - session.startedAt;
   const progress = Math.min(elapsed / session.durationMs, 1);
+  
+  // Aquí recibimos [lat, lng] gracias a la corrección en interpolate
   const [lat, lng] = interpolate(session.waypoints, progress);
 
   // Persist + emit position
+  // lat guardará ~20.5 y lng guardará ~-100.4
   await prisma.position.create({ data: { truckId, lat, lng } });
   emit('truck:position', { truckId, lat, lng, progress });
 
