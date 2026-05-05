@@ -15,7 +15,9 @@ describe('simulator helpers', () => {
     });
 
     it('returns last point at progress 1', () => {
-      expect(interpolate(wp, 1)).toEqual([20, 0]);
+      // waypoints are [lng, lat]; interpolate returns [lat, lng]
+      // last wp [20, 0] → lng=20, lat=0 → returns [lat=0, lng=20]
+      expect(interpolate(wp, 1)).toEqual([0, 20]);
     });
 
     it('interpolates inside a segment', () => {

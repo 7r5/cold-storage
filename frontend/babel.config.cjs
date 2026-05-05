@@ -4,4 +4,21 @@ module.exports = {
     ['@babel/preset-env', { targets: { node: 'current' } }],
     ['@babel/preset-react', { runtime: 'automatic' }],
   ],
+  plugins: [
+    // Replace `import.meta` with `({ env: process.env })` so Jest can handle Vite files
+    function importMetaPlugin() {
+      return {
+        visitor: {
+          MetaProperty(path) {
+            if (
+              path.node.meta.name === 'import' &&
+              path.node.property.name === 'meta'
+            ) {
+              path.replaceWithSourceString('({ env: process.env })');
+            }
+          },
+        },
+      };
+    },
+  ],
 };

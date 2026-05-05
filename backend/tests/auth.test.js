@@ -42,12 +42,13 @@ describe('POST /api/auth/login', () => {
   it('200 with token on success', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 1, username: 'admin', password: 'admin', role: 'USER',
+      firstName: 'Admin', lastName: 'Test', phone: null, age: null, position: null,
     });
     const res = await request(app)
       .post('/api/auth/login')
       .send({ username: 'admin', password: 'admin' });
     expect(res.status).toBe(200);
     expect(res.body.token).toBeTruthy();
-    expect(res.body.user).toEqual({ id: 1, username: 'admin', role: 'USER' });
+    expect(res.body.user).toMatchObject({ id: 1, username: 'admin', role: 'USER', firstName: 'Admin' });
   });
 });

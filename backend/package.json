@@ -29,6 +29,20 @@
     "testEnvironment": "node",
     "testMatch": [
       "<rootDir>/tests/**/*.test.js"
-    ]
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/index.js",
+      "!src/simulator/engine.js",
+      "!src/sockets/index.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 80,
+        "functions": 80,
+        "branches": 70,
+        "statements": 80
+      }
+    }
   }
 }

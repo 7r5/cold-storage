@@ -46,16 +46,16 @@ async function main() {
       password: "yahel",
       role: "ROOT",
       firstName: "Yahel",
-      lastName: "Ramírez Cruz",
+      lastName: "Carrillo",
       phone: "+52 442 200 9988",
-      age: 28,
-      position: "Administrador de sistemas",
+      age: 22,
+      position: "Administrador de logistica",
     },
   });
 
   // Trucks
   const trucksData = [
-    { plate: "UKG-001", model: "Volvo FH16",        driverName: "Pepe Papas.",  boxes: 2 },
+    { plate: "UKG-001", model: "Volvo FH16",        driverName: "Pepe Papas.",  boxes: 1 },
     { plate: "ADF-002", model: "Scania R450",        driverName: "Ricardo A.",  boxes: 1 },
     { plate: "JFK-003", model: "Mercedes Actros",    driverName: "Andres B.",   boxes: 2 },
   ];
