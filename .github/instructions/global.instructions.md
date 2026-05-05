@@ -63,6 +63,15 @@ description: "Global guidelines for the Cold Chain Control project (applies to b
 
 ---
 
+## UI color palette
+- **Primary color is blue** (`blue-*` Tailwind scale). Use it for headers, active states, primary buttons, badges, and key interactive elements.
+- Other colors are allowed for semantic variety (e.g., teal for humidity, violet for temperature, amber/orange for warnings, green for "on route" status, category badges in inventory). These must feel intentional, not random.
+- **Never use red as a decorative or brand color.** Red is reserved exclusively for errors, out-of-range alerts, and destructive actions. Using it anywhere else will make users think something is wrong.
+- **Avoid washed-out or very light tones** as the dominant fill in UI elements (e.g., `blue-100` backgrounds, `slate-200` text). Prefer saturated shades (`blue-600`, `teal-600`, `violet-600`) for labels, icons, and accents so the interface feels crisp and readable on mobile screens.
+- Background surfaces stay neutral (`white`, `slate-50`, `slate-100`). Do not tint surfaces with strong colors.
+
+---
+
 ## Code style
 - Format with **Prettier** (project default config). Run it before committing; do not hand-format.
 - Prefer small, pure functions. Keep route handlers / React components thin; push logic into helpers.
