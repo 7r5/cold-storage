@@ -1,5 +1,6 @@
 // Home / dashboard summary
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 
 export default function Home() {
@@ -49,11 +50,15 @@ export default function Home() {
         )}
         <ul className="divide-y divide-slate-100">
           {trucks.map((t) => (
-            <li key={t.id} className="py-2 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-800">{t.plate}</p>
-                <p className="text-xs text-slate-500">{t.model} · {t.driverName}</p>
-              </div>
+            <li key={t.id}>
+              <Link
+                to={`/camiones/${t.id}`}
+                className="py-2 flex items-center justify-between hover:bg-slate-50 rounded transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{t.plate}</p>
+                  <p className="text-xs text-slate-500">{t.model} · {t.driverName}</p>
+                </div>
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
                   t.status === 'ON_ROUTE'
@@ -63,6 +68,7 @@ export default function Home() {
               >
                 {t.status === 'ON_ROUTE' ? 'En ruta' : t.status === 'IDLE' ? 'Disponible' : 'Mantenimiento'}
               </span>
+              </Link>
             </li>
           ))}
         </ul>
