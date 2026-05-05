@@ -19,7 +19,16 @@ router.post('/login', async (req, res) => {
   const token = encodeToken(user);
   res.json({
     token,
-    user: { id: user.id, username: user.username, role: user.role },
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      age: user.age,
+      position: user.position,
+    },
   });
 });
 

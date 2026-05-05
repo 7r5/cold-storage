@@ -17,6 +17,11 @@ model User {
   username  String   @unique
   password  String
   role      Role     @default(USER)
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  phone     String?
+  age       Int?
+  position  String?  // job title / position
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("users")

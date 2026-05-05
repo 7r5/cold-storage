@@ -13,6 +13,10 @@ import Root from './pages/Root';
 import TruckDetail from './pages/TruckDetail';
 import Rutas from './pages/Rutas';
 import NuevaRuta from './pages/NuevaRuta';
+import Ajustes from './pages/Ajustes';
+import Ayuda from './pages/Ayuda';
+import AcercaDe from './pages/AcercaDe';
+import Documentacion from './pages/Documentacion';
 
 export default function App() {
   return (
@@ -34,6 +38,10 @@ export default function App() {
         <Route path="/camiones/:id" element={<TruckDetail />} />
         <Route path="/rutas" element={<Rutas />} />
         <Route path="/rutas/nueva" element={<NuevaRuta />} />
+        <Route path="/ajustes" element={<Ajustes />} />
+        <Route path="/ayuda" element={<Ayuda />} />
+        <Route path="/acerca-de" element={<AcercaDe />} />
+        <Route path="/documentacion" element={<Documentacion />} />
         <Route
           path="/root"
           element={

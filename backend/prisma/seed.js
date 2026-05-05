@@ -27,12 +27,30 @@ async function main() {
   await prisma.user.upsert({
     where: { username: "max" },
     update: {},
-    create: { username: "max", password: "max", role: "USER" },
+    create: {
+      username: "max",
+      password: "max",
+      role: "USER",
+      firstName: "Maximiliano",
+      lastName: "Torres Vega",
+      phone: "+52 442 100 2001",
+      age: 32,
+      position: "Operador logístico",
+    },
   });
   await prisma.user.upsert({
     where: { username: "yahel" },
     update: {},
-    create: { username: "yahel", password: "yahel", role: "ROOT" },
+    create: {
+      username: "yahel",
+      password: "yahel",
+      role: "ROOT",
+      firstName: "Yahel",
+      lastName: "Ramírez Cruz",
+      phone: "+52 442 200 9988",
+      age: 28,
+      position: "Administrador de sistemas",
+    },
   });
 
   // Trucks
