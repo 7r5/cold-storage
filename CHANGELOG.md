@@ -16,8 +16,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 ### Changed
 - Rangos de cajas actualizados en seed upsert (`-25`/`-13` °C · `58`/`82` % HR) — se aplican en cada deploy.
 - Alertas: gráficas de barras cambiadas a azul (`blue-600`/`cyan-600`); chip de conteo de temperatura usa `violet-600`. Rojo ahora reservado solo para severidad CRITICAL y badge de alertas activas.
-- Alertas historial: gráfica "por hora" muestra solo el dia de hoy de 00:00 hasta la hora actual; gráfica "por dia" muestra hoy + 7 dias anteriores con fechas reales (ej. "5 may").
-### Fixed (Monitores)
+- Alertas historial: gráfica "por hora" muestra solo el dia de hoy de 00:00 hasta la hora actual; gráfica "por dia" muestra hoy + 7 dias anteriores con fechas reales (ej. "5 may").- Home: rediseño de tarjetas de camión — nombre del conductor como texto principal, placa/modelo/estado en fila secundaria, badge de alerta ámbar, barra de progreso en tiempo real para rutas activas (origen→destino con porcentaje). Chips de resumen a 3 columnas.### Fixed (Monitores)
 - Tarjetas de ruta ahora escuchan `route:stopped` via socket → status cambia a "Finalizado" en tiempo real sin recargar.
 - Secciones de cajas (temp/hum) solo se muestran cuando `status === ACTIVE`; en Pendiente y Finalizado se ocultan correctamente.
 - Label de estado ahora muestra tres valores: "En Tránsito" / "Finalizado" / "Pendiente".
