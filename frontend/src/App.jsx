@@ -17,6 +17,7 @@ import Ajustes from './pages/Ajustes';
 import Ayuda from './pages/Ayuda';
 import AcercaDe from './pages/AcercaDe';
 import Documentacion from './pages/Documentacion';
+import Bugs from './pages/Bugs';
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/ayuda" element={<Ayuda />} />
         <Route path="/acerca-de" element={<AcercaDe />} />
         <Route path="/documentacion" element={<Documentacion />} />
+        <Route path="/bugs" element={<Bugs />} />
         <Route
           path="/root"
           element={

@@ -20,6 +20,16 @@ const getTruckColor = (id) => {
   return colors[index];
 };
 
+// Calls map.invalidateSize() after CSS transitions finish so tiles render correctly
+function MapResizer({ trigger }) {
+  const map = useMap();
+  useEffect(() => {
+    const t = setTimeout(() => map.invalidateSize(), 250);
+    return () => clearTimeout(t);
+  }, [trigger, map]);
+  return null;
+}
+
 function MapController({ allRoutes, autoView }) {
   const map = useMap();
   useEffect(() => {
@@ -172,7 +182,7 @@ export default function Monitors() {
       <section
         className={`relative border overflow-hidden shadow-inner bg-slate-100 transition-all duration-200 ${
           mapFullscreen
-            ? "fixed inset-0 z-50 rounded-none mx-0 h-full"
+            ? "fixed inset-0 z-50 rounded-none mx-0 h-screen"
             : "z-10 mx-1 rounded-xl h-80"
         }`}
       >
@@ -206,8 +216,7 @@ export default function Monitors() {
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          />{" "}
-          <MapController allRoutes={liveRoutes} autoView={autoView} />
+          />{" "}          <MapResizer trigger={mapFullscreen} />          <MapController allRoutes={liveRoutes} autoView={autoView} />
           {routes.map((route) => {
             const truck = route.truck;
             const truckId = truck ? String(truck.id) : null;

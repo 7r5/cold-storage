@@ -217,3 +217,24 @@ enum AlertSeverity {
   WARNING
   CRITICAL
 }
+
+// Bug report submitted by any user from within the app
+model Bug {
+  id         Int       @id @default(autoincrement())
+  title      String
+  location   String
+  expected   String    @db.Text
+  actual     String    @db.Text
+  status     BugStatus @default(OPEN)
+  reportedBy String?   @map("reported_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("bugs")
+}
+
+enum BugStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
