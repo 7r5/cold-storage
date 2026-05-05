@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState, Fragment, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -71,6 +71,30 @@ export default function Monitors() {
   const [visiblePlannedRoutes, setVisiblePlannedRoutes] = useState({});
   const [mapFullscreen, setMapFullscreen] = useState(false);
 
+  // Smooth marker animation — bypass React state, write directly to Leaflet
+  const markerRefs = useRef({}); // { [routeId]: L.Marker instance }
+  const animRafs = useRef({});   // { [routeId]: rafId }
+  const markerPos = useRef({});  // { [routeId]: [lat, lng] } current interpolated pos
+
+  const animateMarker = (rid, toLat, toLng) => {
+    const from = markerPos.current[rid] || [toLat, toLng];
+    const startTime = performance.now();
+    const duration = 1000; // match GPS tick interval
+    const easeInOut = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+    if (animRafs.current[rid]) cancelAnimationFrame(animRafs.current[rid]);
+
+    const step = (now) => {
+      const t = easeInOut(Math.min((now - startTime) / duration, 1));
+      const lat = from[0] + (toLat - from[0]) * t;
+      const lng = from[1] + (toLng - from[1]) * t;
+      markerPos.current[rid] = [lat, lng];
+      markerRefs.current[rid]?.setLatLng([lat, lng]);
+      if (t < 1) animRafs.current[rid] = requestAnimationFrame(step);
+    };
+    animRafs.current[rid] = requestAnimationFrame(step);
+  };
+
   useEffect(() => {
     // 1. Cargar Datos Iniciales (Rutas, Historial y Lecturas de sensores)
     const initData = async () => {
@@ -82,7 +106,10 @@ export default function Monitors() {
         // history is keyed by routeId — set directly, no cleanup needed for zeros
         const cleanHistory = {};
         Object.entries(history).forEach(([rid, points]) => {
-          cleanHistory[rid] = points.filter((p) => p[0] !== 0 && p[1] !== 0);
+          const clean = points.filter((p) => p[0] !== 0 && p[1] !== 0);
+          cleanHistory[rid] = clean;
+          // Seed initial marker position from history
+          if (clean.length > 0) markerPos.current[rid] = clean[clean.length - 1];
         });
         setLiveRoutes(cleanHistory);
 
@@ -120,17 +147,19 @@ export default function Monitors() {
     };
 
     const onPos = ({ routeId, lat, lng }) => {
-      // Engine always emits { lat, lng } in [lat, lng] order (Leaflet-ready)
-      // Keyed by routeId to prevent mixing points from different routes of the same truck
       if (lat == null || lng == null || routeId == null) return;
+      const rid = String(routeId);
 
+      // Update polyline (React state, 1fps — for the drawn trail)
       setLiveRoutes((prev) => {
-        const rid = String(routeId);
         const current = prev[rid] || [];
         const last = current[current.length - 1];
         if (last && last[0] === lat && last[1] === lng) return prev;
         return { ...prev, [rid]: [...current, [lat, lng]] };
       });
+
+      // Animate marker at 60fps between old and new GPS point
+      animateMarker(rid, lat, lng);
     };
 
     const onReading = ({ boxId, temperature, humidity }) => {
@@ -173,6 +202,8 @@ export default function Monitors() {
       socket.off("truck:position", onPos);
       socket.off("box:reading", onReading);
       socket.off("alert:new", onAlert);
+      // Cancel any in-flight animations
+      Object.values(animRafs.current).forEach(cancelAnimationFrame);
     };
   }, []);
 
@@ -308,7 +339,12 @@ export default function Monitors() {
                       }}
                     />
                     <Marker
-                      position={livePoints[livePoints.length - 1]}
+                      ref={(m) => {
+                        const rid = String(route.id);
+                        if (m) markerRefs.current[rid] = m;
+                        else delete markerRefs.current[rid];
+                      }}
+                      position={markerPos.current[String(route.id)] || livePoints[livePoints.length - 1]}
                       icon={createDotIcon(color)}
                     >
                       <Popup>

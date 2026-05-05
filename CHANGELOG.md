@@ -18,6 +18,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 - Alertas: gráficas de barras cambiadas a azul (`blue-600`/`cyan-600`); chip de conteo de temperatura usa `violet-600`. Rojo ahora reservado solo para severidad CRITICAL y badge de alertas activas.
 - Alertas historial: gráfica "por hora" muestra solo el dia de hoy de 00:00 hasta la hora actual; gráfica "por dia" muestra hoy + 7 dias anteriores con fechas reales (ej. "5 may").- Home: rediseño de tarjetas de camión — nombre del conductor como texto principal, placa/modelo/estado en fila secundaria, badge de alerta ámbar, barra de progreso en tiempo real para rutas activas (origen→destino con porcentaje). Chips de resumen a 3 columnas.
 - Monitores: labels de estado simplificados a "En Tránsito" / "Inactivo" (eliminados Pendiente y Finalizado).
+- Monitores: movimiento del marcador de camión suavizado — interpolación a 60fps con ease-in-out via `requestAnimationFrame` + `marker.setLatLng()` directo a Leaflet (sin re-renders de React).
 - Splash screen: fondo cambiado de oscuro (`#0f172a`) a blanco para que el logo se mezcle correctamente.### Fixed (Monitores)
 - Tarjetas de ruta ahora escuchan `route:stopped` via socket → status cambia a "Finalizado" en tiempo real sin recargar.
 - Secciones de cajas (temp/hum) solo se muestran cuando `status === ACTIVE`; en Pendiente y Finalizado se ocultan correctamente.
