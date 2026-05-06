@@ -81,4 +81,37 @@ describe('simulator helpers', () => {
       expect(alerts.map((a) => a.type).sort()).toEqual(['HUM', 'TEMP']);
     });
   });
+
+  describe('checkAlert severity', () => {
+    const box = {
+      targetTempMin: -25,
+      targetTempMax: -13,
+      targetHumMin: 58,
+      targetHumMax: 82,
+    };
+
+    it('WARNING when temp deviation < 5', () => {
+      // -10 exceeds max (-13) by 3 °C → WARNING
+      const alerts = checkAlert(box, { temperature: -10, humidity: 70 });
+      expect(alerts[0].severity).toBe('WARNING');
+    });
+
+    it('CRITICAL when temp deviation >= 5', () => {
+      // -7 exceeds max (-13) by 6 °C → CRITICAL
+      const alerts = checkAlert(box, { temperature: -7, humidity: 70 });
+      expect(alerts[0].severity).toBe('CRITICAL');
+    });
+
+    it('WARNING when hum deviation < 10', () => {
+      // 90 exceeds max (82) by 8 % → WARNING
+      const alerts = checkAlert(box, { temperature: -19, humidity: 90 });
+      expect(alerts[0].severity).toBe('WARNING');
+    });
+
+    it('CRITICAL when hum deviation >= 10', () => {
+      // 95 exceeds max (82) by 13 % → CRITICAL
+      const alerts = checkAlert(box, { temperature: -19, humidity: 95 });
+      expect(alerts[0].severity).toBe('CRITICAL');
+    });
+  });
 });

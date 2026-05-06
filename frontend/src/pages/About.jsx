@@ -19,7 +19,7 @@ const CHANGELOG = __CHANGELOG__;
 export default function About() {
 
 function ChangelogEntry({ entry }) {
-  const [open, setOpen] = useState(entry.version === 'Unreleased');
+  const [open, setOpen] = useState(false);
   const isUnreleased = entry.version === 'Unreleased';
   return (
     <li className="border-b border-slate-100 last:border-0">

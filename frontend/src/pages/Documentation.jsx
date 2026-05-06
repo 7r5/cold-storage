@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 function Section({ title, children }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   return (
     <section className="card p-0">
       <button
@@ -95,7 +95,7 @@ export default function Documentation() {
           <Field name="plate" type="String" required desc="Placa del vehículo — única en el sistema." />
           <Field name="model" type="String" required desc="Modelo del camión (ej. Volvo FH16)." />
           <Field name="driverName" type="String" required desc="Nombre corto del conductor (display). Para datos completos ver Driver." />
-          <Field name="driverId" type="Int?" desc="FK al registro Driver con licencia y teléfono." />
+          <Field name="driverId" type="Int?" desc="Referencia al conductor (Driver) con licencia y teléfono." />
           <Field name="status" type="TruckStatus" desc="IDLE, ON_ROUTE o MAINTENANCE. Se actualiza automáticamente al iniciar/terminar simulación." />
         </div>
       </Section>
@@ -116,7 +116,7 @@ export default function Documentation() {
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
           <Field name="code" type="String" required desc="Código identificador único (ej. UKG-001-B1)." />
-          <Field name="truckId" type="Int" required desc="FK al camión que porta esta caja." />
+          <Field name="truckId" type="Int" required desc="Referencia al camión que porta esta caja." />
           <Field name="targetTempMin" type="Float" required desc="Temperatura mínima aceptable (°C). Default seed: −25 °C." />
           <Field name="targetTempMax" type="Float" required desc="Temperatura máxima aceptable (°C). Default seed: −13 °C." />
           <Field name="targetHumMin" type="Float" required desc="Humedad relativa mínima aceptable (%). Default seed: 58 %." />
@@ -128,13 +128,13 @@ export default function Documentation() {
         <p className="text-xs text-slate-500">Un viaje planificado de origen a destino. Contiene los waypoints de navegación.</p>
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
-          <Field name="truckId" type="Int" required desc="FK al camión asignado a esta ruta." />
+          <Field name="truckId" type="Int" required desc="Referencia al camión asignado a esta ruta." />
           <Field name="originName" type="String" required desc="Nombre descriptivo del punto de origen (ej. San Juan del Río, Qro)." />
           <Field name="destinationName" type="String" required desc="Nombre descriptivo del destino." />
-          <Field name="waypoints" type="Json" required desc="Array de coordenadas [lng, lat] que definen el trayecto. Se obtienen con OSRM o se dibujan manualmente. Mínimo 2 puntos." />
+          <Field name="waypoints" type="Json" required desc="Lista de coordenadas [lng, lat] que definen el trayecto. Se obtienen con OSRM o se dibujan manualmente. Mínimo 2 puntos." />
           <Field name="status" type="RouteStatus" desc="PENDING (lista para simular), ACTIVE (simulación en curso), COMPLETED (finalizada)." />
-          <Field name="originBranchId" type="Int?" desc="FK opcional a la sucursal de origen." />
-          <Field name="destinationBranchId" type="Int?" desc="FK opcional a la sucursal de destino." />
+          <Field name="originBranchId" type="Int?" desc="Referencia opcional a la sucursal de origen." />
+          <Field name="destinationBranchId" type="Int?" desc="Referencia opcional a la sucursal de destino." />
           <Field name="startedAt" type="DateTime?" desc="Timestamp de inicio de la simulación. Se asigna automáticamente." />
           <Field name="finishedAt" type="DateTime?" desc="Timestamp de fin. Se asigna al completar." />
         </div>
@@ -144,8 +144,8 @@ export default function Documentation() {
         <p className="text-xs text-slate-500">Lectura de sensor generada por el simulador durante una ruta activa.</p>
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
-          <Field name="boxId" type="Int" required desc="FK a la caja que generó la lectura." />
-          <Field name="routeId" type="Int?" desc="FK a la ruta activa al momento de la lectura (para trazabilidad)." />
+          <Field name="boxId" type="Int" required desc="Referencia a la caja que generó la lectura." />
+          <Field name="routeId" type="Int?" desc="Referencia a la ruta activa al momento de la lectura." />
           <Field name="temperature" type="Float" required desc="Temperatura registrada en °C." />
           <Field name="humidity" type="Float" required desc="Humedad relativa registrada en %." />
           <Field name="recordedAt" type="DateTime" desc="Timestamp automático de la lectura." />
@@ -156,8 +156,8 @@ export default function Documentation() {
         <p className="text-xs text-slate-500">Coordenada GPS registrada durante la simulación de una ruta.</p>
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
-          <Field name="truckId" type="Int" required desc="FK al camión." />
-          <Field name="routeId" type="Int?" desc="FK a la ruta activa. Usado para separar polylines en el mapa cuando hay varias rutas simultáneas." />
+          <Field name="truckId" type="Int" required desc="Referencia al camión." />
+          <Field name="routeId" type="Int?" desc="Referencia a la ruta activa. Separa las trazas en el mapa cuando hay varias rutas activas al mismo tiempo." />
           <Field name="lat" type="Float" required desc="Latitud (sistema Leaflet/WGS84)." />
           <Field name="lng" type="Float" required desc="Longitud." />
           <Field name="recordedAt" type="DateTime" desc="Timestamp automático." />
@@ -168,7 +168,7 @@ export default function Documentation() {
         <p className="text-xs text-slate-500">Alerta generada cuando una lectura sale del rango objetivo de una caja. Se deduplica: solo existe una alerta abierta por caja y tipo a la vez.</p>
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
-          <Field name="boxId" type="Int" required desc="FK a la caja que generó la alerta." />
+          <Field name="boxId" type="Int" required desc="Referencia a la caja que generó la alerta." />
           <Field name="type" type="AlertType" required desc="TEMP (temperatura) o HUM (humedad)." />
           <Field name="severity" type="AlertSeverity" desc="WARNING o CRITICAL." />
           <Field name="message" type="String" required desc="Mensaje descriptivo con el valor fuera de rango." />
@@ -202,8 +202,8 @@ export default function Documentation() {
         <p className="text-xs text-slate-500">Cantidad disponible de un producto en una sucursal específica. No está vinculado a rutas ni camiones — es el inventario en sitio.</p>
         <div className="space-y-0.5">
           <Field name="id" type="Int" desc="Identificador único." />
-          <Field name="branchId" type="Int" required desc="FK a la sucursal." />
-          <Field name="productId" type="Int" required desc="FK al producto." />
+          <Field name="branchId" type="Int" required desc="Referencia a la sucursal." />
+          <Field name="productId" type="Int" required desc="Referencia al producto." />
           <Field name="quantity" type="Float" required desc="Cantidad en stock." />
           <Field name="unit" type="String" required desc="Unidad de medida (ej. unidades, dosis, kg). Default: units." />
           <Field name="updatedAt" type="DateTime" desc="Timestamp de última actualización." />
@@ -212,15 +212,15 @@ export default function Documentation() {
       </Section>
 
       <Section title="Entidades — BoxLoad (Carga)">
-        <p className="text-xs text-slate-500">Registro de qué producto, en qué cantidad, viajó en qué caja durante qué ruta. Pivote entre Box, Product y Route.</p>
+        <p className="text-xs text-slate-500">Registro de qué producto, en qué cantidad, viajó en qué caja durante qué ruta. Vincula Box, Product y Route en una sola entrada.</p>
         <div className="space-y-0.5">
-          <Field name="boxId" type="Int" required desc="FK a la caja contenedora." />
-          <Field name="productId" type="Int" required desc="FK al producto cargado." />
-          <Field name="routeId" type="Int" required desc="FK a la ruta del viaje." />
+          <Field name="boxId" type="Int" required desc="Referencia a la caja contenedora." />
+          <Field name="productId" type="Int" required desc="Referencia al producto cargado." />
+          <Field name="routeId" type="Int" required desc="Referencia a la ruta del viaje." />
           <Field name="quantity" type="Float" required desc="Cantidad del producto (número)." />
           <Field name="unit" type="String" required desc="Unidad de medida (ej. unidades, kg, dosis). Default: units." />
         </div>
-        <p className="text-xs text-slate-400">Restricción única: (boxId, productId, routeId) — no se puede duplicar la misma carga en el mismo viaje.</p>
+        <p className="text-xs text-slate-400">Una caja puede cargar distintos productos en distintas rutas. No se puede duplicar el mismo producto en la misma caja para la misma ruta.</p>
       </Section>
 
       <Section title="Entidades — Bug (Reporte de error)">
@@ -233,6 +233,17 @@ export default function Documentation() {
           <Field name="actual" type="String" required desc="Comportamiento observado." />
           <Field name="status" type="BugStatus" desc="OPEN, IN_PROGRESS o CLOSED." />
           <Field name="reportedBy" type="String?" desc="Username de quien reportó." />
+        </div>
+      </Section>
+
+      <Section title="Entidades — Review (Reseña)">
+        <p className="text-xs text-slate-500">Opinión de un usuario sobre la app. Incluye calificación del 1 al 5 y un comentario opcional.</p>
+        <div className="space-y-0.5">
+          <Field name="id" type="Int" desc="Identificador único." />
+          <Field name="rating" type="Int" required desc="Calificación de 1 (mínimo) a 5 (máximo) estrellas." />
+          <Field name="comment" type="String?" desc="Texto libre con la opinión del usuario (máx. 500 caracteres)." />
+          <Field name="username" type="String?" desc="Nombre del usuario que dejó la reseña. Puede ser nulo si no está disponible." />
+          <Field name="createdAt" type="DateTime" desc="Fecha y hora automática de envío." />
         </div>
       </Section>
 
@@ -249,7 +260,7 @@ export default function Documentation() {
       {/* Relationships */}
       <Section title="Relaciones entre entidades">
         <div className="space-y-2">
-          <Rel from="Truck" to="Driver" desc="Un camión tiene un conductor asignado (opcional, FK a Driver)." />
+          <Rel from="Truck" to="Driver" desc="Un camión tiene un conductor asignado (opcional)." />
           <Rel from="Truck" to="Box[]" desc="Un camión tiene una o más cajas refrigeradas." />
           <Rel from="Truck" to="Route[]" desc="Un camión puede tener muchas rutas (historial de viajes)." />
           <Rel from="Route" to="Truck" desc="Cada ruta está asignada a exactamente un camión." />
@@ -260,7 +271,8 @@ export default function Documentation() {
           <Rel from="Box" to="BoxLoad[]" desc="Una caja puede cargar distintos productos en distintas rutas." />
           <Rel from="Reading" to="Route" desc="Cada lectura recuerda en qué ruta se generó (trazabilidad)." />
           <Rel from="Position" to="Truck + Route" desc="Cada posición GPS registra el camión y la ruta activa para separar las trazas en el mapa." />
-          <Rel from="BoxLoad" to="Box + Product + Route" desc="Tabla pivot: relaciona caja, producto y viaje en un solo registro." />
+          <Rel from="BoxLoad" to="Box + Product + Route" desc="Registro de relación: vincula caja, producto y viaje en una sola entrada." />
+          <Rel from="Review" to="(ninguna)" desc="Entidad independiente — no vinculada a rutas ni camiones. Captura la opinión del usuario sobre la app." />
           <Rel from="BranchStock" to="Branch + Product" desc="Inventario en sitio: cantidad de un producto en una sucursal (independiente de rutas)." />
         </div>
       </Section>

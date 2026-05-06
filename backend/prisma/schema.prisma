@@ -273,6 +273,17 @@ model Driver {
   @@map("drivers")
 }
 
+// App review submitted by any logged-in user
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1–5 stars
+  comment   String?  @db.Text
+  username  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("reviews")
+}
+
 // FAQ entry displayed in the Ayuda (Help) page
 model Faq {
   id        Int      @id @default(autoincrement())

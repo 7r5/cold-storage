@@ -87,20 +87,33 @@ function generateReading(box, forcedTempOffset = 0, forcedHumOffset = 0) {
   };
 }
 
-// Produce alerts when readings are out of range
+// Produce alerts when readings are out of range.
+// Severity: CRITICAL when deviation ≥ 5 °C (temp) or ≥ 10 % (hum); otherwise WARNING.
 function checkAlert(box, reading) {
   const alerts = [];
-  if (reading.temperature < box.targetTempMin || reading.temperature > box.targetTempMax) {
+  const tempDev =
+    reading.temperature < box.targetTempMin
+      ? box.targetTempMin - reading.temperature
+      : reading.temperature > box.targetTempMax
+        ? reading.temperature - box.targetTempMax
+        : 0;
+  if (tempDev > 0) {
     alerts.push({
       type: 'TEMP',
-      severity: 'WARNING',
+      severity: tempDev >= 5 ? 'CRITICAL' : 'WARNING',
       message: `Temperatura fuera de rango (${reading.temperature} °C)`,
     });
   }
-  if (reading.humidity < box.targetHumMin || reading.humidity > box.targetHumMax) {
+  const humDev =
+    reading.humidity < box.targetHumMin
+      ? box.targetHumMin - reading.humidity
+      : reading.humidity > box.targetHumMax
+        ? reading.humidity - box.targetHumMax
+        : 0;
+  if (humDev > 0) {
     alerts.push({
       type: 'HUM',
-      severity: 'WARNING',
+      severity: humDev >= 10 ? 'CRITICAL' : 'WARNING',
       message: `Humedad fuera de rango (${reading.humidity} %)`,
     });
   }
@@ -268,6 +281,14 @@ function clearForcedOffsets(truckId) {
   setForcedOffset(truckId, { tempOffset: 0, humOffset: 0 });
 }
 
+// Temporarily apply a forced offset and auto-reset after durationMs (default 10 s)
+function triggerSpike(truckId, { tempOffset = 0, humOffset = 0, durationMs = 10000 }) {
+  setForcedOffset(truckId, { tempOffset, humOffset });
+  setTimeout(() => {
+    try { clearForcedOffsets(truckId); } catch (_) {}
+  }, durationMs);
+}
+
 function getActive() {
   return Array.from(activeTrucks.entries()).map(([truckId, s]) => ({
     truckId,
@@ -293,6 +314,7 @@ module.exports = {
   stopRoute,
   setForcedOffset,
   clearForcedOffsets,
+  triggerSpike,
   getActive,
   shutdown,
   // exported for tests

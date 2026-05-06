@@ -14,6 +14,31 @@ import { getSocket } from "../api/socket";
 
 // --- UTILIDADES ---
 
+const ROUTE_DURATION_MS = 120_000; // must match engine.js
+
+function fmtSecs(s) {
+  return s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+}
+
+function RouteTimer({ startedAt }) {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const tick = () => setElapsed(Date.now() - new Date(startedAt).getTime());
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
+  const remaining = Math.max(0, ROUTE_DURATION_MS - elapsed);
+  const elapsedSec = Math.floor(elapsed / 1000);
+  const remainSec = Math.floor(remaining / 1000);
+  return (
+    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-1">
+      <span>⏱ {fmtSecs(elapsedSec)} en ruta</span>
+      <span>{remaining > 0 ? `ETA ${fmtSecs(remainSec)}` : 'Finalizado'}</span>
+    </div>
+  );
+}
+
 const getTruckColor = (id) => {
   const colors = ["#f43f5e", "#10b981", "#ee1ba5", "#6366f1"];
   const index = (parseInt(id) * 7) % colors.length;
@@ -397,8 +422,7 @@ export default function Monitors() {
                 <div className="max-w-[70%]">
                   <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
                     {isActive ? "En Tránsito" : "Inactivo"}
-                  </h3>
-                  <p className="text-base font-bold text-slate-800 leading-tight">
+                  </h3>                  {isActive && r.startedAt && <RouteTimer startedAt={r.startedAt} />}                  <p className="text-base font-bold text-slate-800 leading-tight">
                     {r.originName.split(",")[0]} →{" "}
                     {r.destinationName.split(",")[0]}
                   </p>

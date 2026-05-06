@@ -59,4 +59,20 @@ router.post('/clear', (req, res) => {
   }
 });
 
+// POST /api/simulator/spike  { truckId, tempOffset?, humOffset?, durationMs? }
+// Applies a forced offset for durationMs (default 10 s) then auto-resets.
+router.post('/spike', (req, res) => {
+  try {
+    const truckId = parseInt(req.body.truckId, 10);
+    engine.triggerSpike(truckId, {
+      tempOffset: req.body.tempOffset,
+      humOffset: req.body.humOffset,
+      durationMs: req.body.durationMs ?? 10000,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 module.exports = router;

@@ -23,6 +23,7 @@ export default function More() {
   const items = [
     { label: 'Rutas', to: '/rutas', desc: 'Registrar y administrar rutas' },
     { label: 'Documentación', to: '/documentacion', desc: 'Entidades, relaciones y guía técnica' },
+    { label: 'Reseñas', to: '/resenas', desc: 'Calificaciones y opiniones de la app' },
     { label: 'Reporte de bugs', to: '/bugs', desc: 'Reportar y ver errores conocidos' },
     { label: 'Ajustes', to: '/ajustes', desc: 'Perfil y preferencias de la cuenta' },
     { label: '¿Necesitas ayuda?', to: '/ayuda', desc: 'Preguntas frecuentes y soporte' },

@@ -89,28 +89,42 @@ export default function Root() {
                   disabled={busy}
                   onClick={() =>
                     run('Anomalía temperatura', () =>
-                      api.post('/api/simulator/anomaly', {
+                      api.post('/api/simulator/spike', {
                         truckId: a.truckId,
-                        tempOffset: 8,
+                        tempOffset: 13,
                       }),
                     )
                   }
                 >
-                  Simular alza de temperatura
+                  Alza temperatura (10s)
                 </button>
                 <button
                   className="btn-secondary text-xs"
                   disabled={busy}
                   onClick={() =>
                     run('Anomalía humedad', () =>
-                      api.post('/api/simulator/anomaly', {
+                      api.post('/api/simulator/spike', {
                         truckId: a.truckId,
-                        humOffset: 25,
+                        humOffset: 30,
                       }),
                     )
                   }
                 >
-                  Simular humedad alta
+                  Humedad alta (10s)
+                </button>
+                <button
+                  className="btn-secondary text-xs border-red-300 text-red-700 hover:bg-red-50"
+                  disabled={busy}
+                  onClick={() =>
+                    run('Alerta crítica', () =>
+                      api.post('/api/simulator/spike', {
+                        truckId: a.truckId,
+                        tempOffset: 22,
+                      }),
+                    )
+                  }
+                >
+                  Alerta crítica (10s)
                 </button>
                 <button
                   className="btn-secondary text-xs"
@@ -124,7 +138,7 @@ export default function Root() {
                   Limpiar anomalías
                 </button>
                 <button
-                  className="btn-primary text-xs bg-red-600 hover:bg-red-700"
+                  className="btn-primary text-xs bg-red-600 hover:bg-red-700 col-span-2"
                   disabled={busy}
                   onClick={() =>
                     run('Detener ruta', () =>

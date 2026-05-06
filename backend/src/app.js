@@ -12,6 +12,7 @@ const alertsRoutes = require('./routes/alerts');
 const simulatorRoutes = require('./routes/simulator');
 const bugsRoutes = require('./routes/bugs');
 const branchesRoutes = require('./routes/branches');
+const reviewsRoutes = require('./routes/reviews');
 const { requireAuth } = require('./middleware/auth');
 
 function createApp() {
@@ -33,6 +34,7 @@ function createApp() {
   app.use('/api/alerts', requireAuth, alertsRoutes);
   app.use('/api/bugs', bugsRoutes);
   app.use('/api/branches', branchesRoutes);
+  app.use('/api/reviews', reviewsRoutes);
   app.use('/api/simulator', simulatorRoutes);
 
   // 404

@@ -92,11 +92,12 @@ description: "Global guidelines for the Cold Chain Control project (applies to b
 
 ---
 
-## README
-- **Whenever new routes, models, pages, components, or significant features are generated, update `README.md` in the same response:**
-  - Add the new entity to the data model table (if applicable).
-  - Document new endpoints, screens, or commands.
+## README + Documentation
+- **Whenever new routes, models, pages, components, or significant features are generated, update `README.md` AND `frontend/src/pages/Documentation.jsx` in the same response:**
+  - Add the new entity to the data model table in README (if applicable).
+  - Document new endpoints, screens, or commands in README.
   - Append a `Changelog` entry with today's date.
+  - Add or update the corresponding `<Section>` in `Documentation.jsx` for any new entity, relationship, or notable convention.
 
 ---
 

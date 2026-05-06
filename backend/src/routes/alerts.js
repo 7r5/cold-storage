@@ -14,7 +14,22 @@ router.get('/', async (req, res) => {
       ...(onlyActive ? { acknowledged: false } : {}),
       ...(since ? { recordedAt: { gte: since } } : {}),
     },
-    include: { box: { select: { id: true, code: true, truckId: true } } },
+    include: {
+      box: {
+        select: {
+          id: true,
+          code: true,
+          truckId: true,
+          truck: {
+            select: {
+              plate: true,
+              driverName: true,
+              driver: { select: { firstName: true, lastName: true } },
+            },
+          },
+        },
+      },
+    },
     orderBy: { recordedAt: 'desc' },
     ...(limit ? { take: limit } : {}),
   });

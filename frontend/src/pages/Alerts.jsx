@@ -109,6 +109,11 @@ const SEVERITY_COLOR = {
 };
 
 function AlertCard({ alert: a, onAck }) {
+  const truck = a.box?.truck;
+  const driver = truck?.driver;
+  const driverName = driver
+    ? `${driver.firstName} ${driver.lastName}`
+    : truck?.driverName ?? null;
   return (
     <li className="card">
       <div className="flex items-start justify-between gap-3">
@@ -118,7 +123,10 @@ function AlertCard({ alert: a, onAck }) {
           </p>
           <p className="text-sm text-slate-800">{a.message}</p>
           <p className="text-xs text-slate-400 mt-1">
-            Caja {a.box?.code || a.boxId} ·{' '}
+            Caja {a.box?.code || a.boxId}
+            {truck && <> · Camión {truck.plate}</>}
+            {driverName && <> · {driverName}</>}
+            {' · '}
             {new Date(a.recordedAt).toLocaleString('es-MX', {
               month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
             })}

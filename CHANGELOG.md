@@ -6,6 +6,28 @@ Todas las versiones notables de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
+## [0.3.5] — 2026-05-06
+
+### Added
+- Reseñas: nueva entidad `Review` (schema + API `GET/POST /api/reviews` + página `/resenas`). Calificación 1–5 estrellas y comentario opcional.
+- Monitores: temporizador en vivo en cada tarjeta de ruta activa — muestra tiempo en ruta (Xm Xs) y tiempo estimado para finalizar (ETA).
+- Simulador: nuevo endpoint `POST /api/simulator/spike` que aplica una anomalía durante 10 s y luego se autoreinicia.
+- Simulador: botón "Alerta crítica (10s)" en el panel ROOT que dispara un offset de +22 °C garantizando severidad CRITICAL.
+- Alertas: tarjeta muestra camión (placa) y conductor además de la caja.
+- Severidad dinámica: alertas de temperatura con desviación ≥ 5 °C → CRITICAL; humedad ≥ 10 % → CRITICAL.
+
+### Fixed
+- Simulador de temperatura: offset aumentado de 8 a 13 °C para garantizar que siempre rebasa el umbral del rango objetivo.
+- Simulador: las anomalías ahora duran 10 segundos y regresan automáticamente al valor normal.
+
+### Changed
+- Documentación: todas las secciones inician colapsadas.
+- Documentación: lenguaje técnico simplificado ("FK" → "Referencia a", "Array" → "Lista", "Pivote" → "Vincula").
+- Changelog (Acerca de): todas las versiones inician colapsadas.
+- Panel Más: item "Reseñas" agregado a la navegación.
+- Instrucciones de Copilot: regla que exige actualizar `Documentation.jsx` en cada release.
+
+---
 ## [0.3.4] — 2026-05-05
 
 ### Added

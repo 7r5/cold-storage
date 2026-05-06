@@ -18,6 +18,7 @@ import Help from './pages/Help';
 import About from './pages/About';
 import Documentation from './pages/Documentation';
 import Bugs from './pages/Bugs';
+import Reviews from './pages/Reviews';
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/acerca-de" element={<About />} />
         <Route path="/documentacion" element={<Documentation />} />
         <Route path="/bugs" element={<Bugs />} />
+        <Route path="/resenas" element={<Reviews />} />
         <Route
           path="/root"
           element={
