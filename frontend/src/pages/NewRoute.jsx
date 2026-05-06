@@ -47,7 +47,7 @@ function ClickLayer({ enabled, onAdd }) {
   return null;
 }
 
-export default function NuevaRuta() {
+export default function NewRoute() {
   const navigate = useNavigate();
 
   const [trucks, setTrucks] = useState([]);

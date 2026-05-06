@@ -1,4 +1,4 @@
-// Tests for Ajustes and More pages (use AuthContext)
+// Tests for Settings and More pages (use AuthContext)
 jest.mock('../api/client', () => ({
   api: { get: jest.fn(), post: jest.fn(), postPublic: jest.fn() },
 }));
@@ -8,7 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../auth/AuthContext';
-import Ajustes from '../pages/Ajustes';
+import Settings from '../pages/Settings';
 import More from '../pages/More';
 
 const mockUser = {
@@ -22,12 +22,12 @@ const mockUser = {
   position: 'Logístico',
 };
 
-function setupAjustes(user = mockUser) {
+function setupSettings(user = mockUser) {
   if (user) localStorage.setItem('ccc_user', JSON.stringify(user));
   return render(
     <MemoryRouter>
       <AuthProvider>
-        <Ajustes />
+        <Settings />
       </AuthProvider>
     </MemoryRouter>,
   );
@@ -49,59 +49,59 @@ function setupMore(user = mockUser) {
 
 beforeEach(() => localStorage.clear());
 
-// ─── Ajustes ─────────────────────────────────────────────────────────────────
+// ─── Settings ────────────────────────────────────────────────────────────────
 
-describe('Ajustes page', () => {
+describe('Settings page', () => {
   it('renders page heading', () => {
-    setupAjustes();
+    setupSettings();
     expect(screen.getByText('Ajustes')).toBeInTheDocument();
   });
 
   it('shows user full name', () => {
-    setupAjustes();
+    setupSettings();
     const names = screen.getAllByText('Maximiliano García');
     expect(names.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows role label', () => {
-    setupAjustes();
+    setupSettings();
     expect(screen.getByText('Operador')).toBeInTheDocument();
   });
 
   it('shows phone and age', () => {
-    setupAjustes();
+    setupSettings();
     expect(screen.getByText('555-1234')).toBeInTheDocument();
     expect(screen.getByText('30 años')).toBeInTheDocument();
   });
 
   it('shows dashes for missing optional fields', () => {
-    setupAjustes({ id: 2, username: 'anon', role: 'USER' });
+    setupSettings({ id: 2, username: 'anon', role: 'USER' });
     const dashes = screen.getAllByText('—');
     expect(dashes.length).toBeGreaterThan(0);
   });
 
   it('navigates back on button click', async () => {
     const user = userEvent.setup();
-    setupAjustes();
+    setupSettings();
     const backBtn = screen.getAllByRole('button')[0];
     await user.click(backBtn);
     expect(backBtn).toBeInTheDocument();
   });
 
   it('uses username as fullName when firstName and lastName are absent', () => {
-    setupAjustes({ id: 3, username: 'solo', role: 'ROOT' });
+    setupSettings({ id: 3, username: 'solo', role: 'ROOT' });
     // fullName falls back to username
     expect(screen.getAllByText('solo').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows user with only lastName (no firstName)', () => {
-    setupAjustes({ id: 7, username: 'nofirst', role: 'USER', lastName: 'Torres' });
+    setupSettings({ id: 7, username: 'nofirst', role: 'USER', lastName: 'Torres' });
     // firstName ?? '' → '' branch
     expect(screen.getAllByText('Torres').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows user with only firstName (no lastName)', () => {
-    setupAjustes({ id: 8, username: 'nolast', role: 'USER', firstName: 'Laura' });
+    setupSettings({ id: 8, username: 'nolast', role: 'USER', firstName: 'Laura' });
     // lastName ?? '' → '' branch
     expect(screen.getAllByText('Laura').length).toBeGreaterThanOrEqual(1);
   });

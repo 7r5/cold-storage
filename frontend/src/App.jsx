@@ -11,12 +11,12 @@ import Alerts from './pages/Alerts';
 import More from './pages/More';
 import Root from './pages/Root';
 import TruckDetail from './pages/TruckDetail';
-import Rutas from './pages/Rutas';
-import NuevaRuta from './pages/NuevaRuta';
-import Ajustes from './pages/Ajustes';
-import Ayuda from './pages/Ayuda';
-import AcercaDe from './pages/AcercaDe';
-import Documentacion from './pages/Documentacion';
+import RoutesPage from './pages/Routes';
+import NewRoute from './pages/NewRoute';
+import Settings from './pages/Settings';
+import Help from './pages/Help';
+import About from './pages/About';
+import Documentation from './pages/Documentation';
 import Bugs from './pages/Bugs';
 
 export default function App() {
@@ -37,12 +37,12 @@ export default function App() {
         <Route path="/alertas" element={<Alerts />} />
         <Route path="/mas" element={<More />} />
         <Route path="/camiones/:id" element={<TruckDetail />} />
-        <Route path="/rutas" element={<Rutas />} />
-        <Route path="/rutas/nueva" element={<NuevaRuta />} />
-        <Route path="/ajustes" element={<Ajustes />} />
-        <Route path="/ayuda" element={<Ayuda />} />
-        <Route path="/acerca-de" element={<AcercaDe />} />
-        <Route path="/documentacion" element={<Documentacion />} />
+        <Route path="/rutas" element={<RoutesPage />} />
+        <Route path="/rutas/nueva" element={<NewRoute />} />
+        <Route path="/ajustes" element={<Settings />} />
+        <Route path="/ayuda" element={<Help />} />
+        <Route path="/acerca-de" element={<About />} />
+        <Route path="/documentacion" element={<Documentation />} />
         <Route path="/bugs" element={<Bugs />} />
         <Route
           path="/root"

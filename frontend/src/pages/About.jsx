@@ -16,7 +16,7 @@ const STACK = [
 // Injected at build time from CHANGELOG.md by vite.config.js
 const CHANGELOG = __CHANGELOG__;
 
-export default function AcercaDe() {
+export default function About() {
 
 function ChangelogEntry({ entry }) {
   const [open, setOpen] = useState(entry.version === 'Unreleased');

@@ -47,7 +47,7 @@ function Rel({ from, to, desc }) {
   );
 }
 
-export default function Documentacion() {
+export default function Documentation() {
   const navigate = useNavigate();
 
   return (

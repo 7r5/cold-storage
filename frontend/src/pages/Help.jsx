@@ -60,7 +60,7 @@ function FaqItem({ q, a }) {
   );
 }
 
-export default function Ayuda() {
+export default function Help() {
   const navigate = useNavigate();
 
   return (

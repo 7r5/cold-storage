@@ -18,6 +18,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 - Monitores: label de estado ahora dice "En Tránsito" / "Inactivo" (eliminado Pendiente/Finalizado).
 - Monitores: escucha `route:stopped` para actualizar tarjetas en tiempo real sin recargar.
 - Splash screen: fondo blanco para que el logo no se mezcle con fondo oscuro.
+- Renombrados archivos de páginas en español a inglés (`AcercaDe`→`About`, `Ajustes`→`Settings`, `Ayuda`→`Help`, `Documentacion`→`Documentation`, `NuevaRuta`→`NewRoute`, `Rutas`→`Routes`). Funciones internas, imports y tests actualizados.
 
 ### Docs
 - Documentación: añadidas entidades Driver, BranchStock, Bug, Faq; rangos actualizados; flujo de simulación corregido; eventos Socket.IO documentados.

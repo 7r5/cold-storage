@@ -15,7 +15,7 @@ const STATUS_COLOR = {
   COMPLETED: 'bg-slate-100 text-slate-500',
 };
 
-export default function Rutas() {
+export default function Routes() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);

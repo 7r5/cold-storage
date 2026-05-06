@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 
 const ROLE_LABEL = { USER: 'Operador', ROOT: 'Administrador' };
 
-export default function Ajustes() {
+export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
 

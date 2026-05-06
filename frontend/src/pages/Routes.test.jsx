@@ -1,4 +1,4 @@
-// Tests for Rutas page (route list)
+// Tests for Routes page (route list)
 jest.mock('../api/client', () => ({
   api: {
     get: jest.fn(),
@@ -10,16 +10,16 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import Rutas from '../pages/Rutas';
+import Routes from '../pages/Routes';
 import { api } from '../api/client';
 
-// Rutas uses window.confirm before deleting
+// Routes uses window.confirm before deleting
 window.confirm = jest.fn(() => true);
 
 function setup() {
   return render(
     <MemoryRouter>
-      <Rutas />
+      <Routes />
     </MemoryRouter>,
   );
 }
@@ -30,7 +30,7 @@ beforeEach(() => {
   window.confirm.mockReturnValue(true);
 });
 
-describe('Rutas page', () => {
+describe('Routes page', () => {
   it('shows loading state initially', () => {
     api.get.mockReturnValue(new Promise(() => {}));
     setup();
