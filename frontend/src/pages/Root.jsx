@@ -88,10 +88,10 @@ export default function Root() {
                   className="btn-secondary text-xs"
                   disabled={busy}
                   onClick={() =>
-                    run('Anomalía temperatura', () =>
+                    run('Alza temperatura (advertencia)', () =>
                       api.post('/api/simulator/spike', {
                         truckId: a.truckId,
-                        tempOffset: 13,
+                        tempOffset: 6,  // 5°C base + 6 = 11°C → 3°C sobre el límite → WARNING
                       }),
                     )
                   }
@@ -116,10 +116,10 @@ export default function Root() {
                   className="btn-secondary text-xs border-red-300 text-red-700 hover:bg-red-50"
                   disabled={busy}
                   onClick={() =>
-                    run('Alerta crítica', () =>
+                    run('Fallo de refrigeración (crítico)', () =>
                       api.post('/api/simulator/spike', {
                         truckId: a.truckId,
-                        tempOffset: 22,
+                        tempOffset: 20,  // 5°C base + 20 = 25°C → refrigeración apagada → CRITICAL
                       }),
                     )
                   }

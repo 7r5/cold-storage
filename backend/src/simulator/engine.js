@@ -62,28 +62,18 @@ function interpolate(waypoints, progress) {
   return [interLat, interLng]; 
 }
 
-// Generate a noisy reading around the box target range
-/**
- * Returns a temperature offset based on the hour of the day:
- *   - Peaks at +5 °C around 14:00 (warmest part of the day)
- *   - Dips to -5 °C around 02:00 (coldest part of the night)
- * Uses a cosine curve: offset = -5 * cos(2π * (hour - 2) / 24)
- */
-function timeOfDayOffset() {
-  const hour = new Date().getHours() + new Date().getMinutes() / 60;
-  const base = -5 * Math.cos((2 * Math.PI * (hour - 2)) / 24);
-  const jitter = (Math.random() - 0.5) * 2; // ±1 °C random variation
-  return +(base + jitter).toFixed(2);
-}
-
+// Generate a noisy reading that stays comfortably within the box's target range.
+// Pharmaceutical cold chain: 2–8 °C.  The refrigerator maintains temperature
+// regardless of ambient conditions — no time-of-day drift.
 function generateReading(box, forcedTempOffset = 0, forcedHumOffset = 0) {
   const tempMid = (box.targetTempMin + box.targetTempMax) / 2;
-  const humMid = (box.targetHumMin + box.targetHumMax) / 2;
+  const humMid  = (box.targetHumMin  + box.targetHumMax)  / 2;
+  // Small sensor noise (±0.3 °C / ±1 % RH) — never pushes out of range on its own
   const noiseT = (Math.random() - 0.5) * 0.6;
   const noiseH = (Math.random() - 0.5) * 2;
   return {
-    temperature: +(tempMid + noiseT + timeOfDayOffset() + forcedTempOffset).toFixed(2),
-    humidity: +(humMid + noiseH + forcedHumOffset).toFixed(2),
+    temperature: +(tempMid + noiseT + forcedTempOffset).toFixed(2),
+    humidity:    +(humMid  + noiseH + forcedHumOffset).toFixed(2),
   };
 }
 
