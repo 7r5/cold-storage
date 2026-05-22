@@ -170,6 +170,7 @@ export default function DinoGame() {
   const [overlay, setOverlay] = useState(null); // { score: number } | null
   const [nameInput, setNameInput] = useState('');
   const overlayActive = useRef(false);
+  const submitting = useRef(false);
   // Updated every render so the game loop can call it without stale closure
   const triggerOverlay = useRef(null);
   triggerOverlay.current = (data) => { overlayActive.current = true; setOverlay(data); };
@@ -189,6 +190,8 @@ export default function DinoGame() {
   const rafId = useRef(null);
 
   async function saveRecord() {
+    if (submitting.current) return;   // prevent double-submit
+    submitting.current = true;
     const name = nameInput.trim() || 'Anónimo';
     try {
       await api.postPublic('/api/scores', { name, score: overlay.score });
@@ -197,6 +200,7 @@ export default function DinoGame() {
     setOverlay(null);
     setNameInput('');
     overlayActive.current = false;
+    submitting.current = false;
   }
 
   function skipRecord() {
@@ -305,8 +309,12 @@ export default function DinoGame() {
         s.onGround = true;
       }
 
-      // Spawn cactus
-      const spawnInterval = Math.max(55, 110 - Math.floor(s.score / 15));
+      // Speed ramp — gets noticeably faster over time
+      s.speed = 4 + s.score / 50;
+      s.score += 0.12;
+
+      // Tighter spawn interval as speed increases
+      const spawnInterval = Math.max(40, 110 - Math.floor(s.score / 8));
       if (s.cacti.length === 0 || (s.frame % spawnInterval === 0)) {
         if (s.frame > 30) {
           s.cacti.push({ x: W + 10, h: 28 + Math.random() * 28 });
@@ -316,10 +324,6 @@ export default function DinoGame() {
       // Move + cull cacti
       s.cacti.forEach((c) => { c.x -= s.speed; });
       s.cacti = s.cacti.filter((c) => c.x > -40);
-
-      // Speed ramp
-      s.speed = 4 + s.score / 150;
-      s.score += 0.12;
 
       // Collision (shrunk hitbox for fairness)
       for (const c of s.cacti) {
@@ -439,9 +443,10 @@ export default function DinoGame() {
                     </button>
                     <button
                       onClick={saveRecord}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 text-sm"
+                      disabled={submitting.current}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-lg py-2 text-sm"
                     >
-                      Guardar
+                      {submitting.current ? 'Guardando...' : 'Guardar'}
                     </button>
                   </div>
                 </div>
