@@ -10,6 +10,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ### Fixed
 - Deploy Render: actualizado `@vitejs/plugin-react` de `^4.3.3` a `^6.0.2` para resolver conflicto de peer deps con `vite@^8`. El build local y remoto ahora pasan sin `--legacy-peer-deps`.
+- Alertas scoped a ruta: `Alert` ahora tiene `routeId`. La deduplicación cambia de `(boxId, type)` a `(boxId, type, routeId)`, evitando que rutas anteriores del mismo camión contaminen las alertas activas de la ruta actual.
 
 ### Added
 - Reseñas: nueva entidad `Review` (schema + API `GET/POST /api/reviews` + página `/resenas`). Calificación 1–5 estrellas y comentario opcional.

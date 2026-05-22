@@ -29,6 +29,7 @@ router.get('/', async (req, res) => {
           },
         },
       },
+      route: { select: { id: true, originName: true, destinationName: true } },
     },
     orderBy: { recordedAt: 'desc' },
     ...(limit ? { take: limit } : {}),

@@ -126,6 +126,7 @@ function AlertCard({ alert: a, onAck }) {
             Caja {a.box?.code || a.boxId}
             {truck && <> · Camión {truck.plate}</>}
             {driverName && <> · {driverName}</>}
+            {a.route && <> · {a.route.originName.split(',')[0]} → {a.route.destinationName.split(',')[0]}</>}
             {' · '}
             {new Date(a.recordedAt).toLocaleString('es-MX', {
               month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',

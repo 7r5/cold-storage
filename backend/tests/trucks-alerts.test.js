@@ -76,11 +76,14 @@ describe('GET /api/alerts', () => {
 
   it('200 returns all alerts', async () => {
     prisma.alert.findMany.mockResolvedValue([
-      { id: 1, type: 'TEMP', acknowledged: false, box: { id: 1, code: 'BOX-A', truckId: 1 } },
+      { id: 1, type: 'TEMP', acknowledged: false, routeId: 1,
+        box: { id: 1, code: 'BOX-A', truckId: 1, truck: { plate: 'ABC-001', driverName: 'Juan', driver: null } },
+        route: { id: 1, originName: 'CDMX', destinationName: 'Qro' } },
     ]);
     const res = await request(app).get('/api/alerts').set('Authorization', authHeader);
     expect(res.status).toBe(200);
     expect(res.body[0].type).toBe('TEMP');
+    expect(res.body[0].routeId).toBe(1);
   });
 
   it('200 with onlyActive=true filter', async () => {

@@ -96,6 +96,7 @@ model Route {
   loads              BoxLoad[]
   readings           Reading[]
   positions          Position[]
+  alerts             Alert[]
 
   @@map("routes")
 }
@@ -216,14 +217,17 @@ model BoxLoad {
 model Alert {
   id           Int           @id @default(autoincrement())
   boxId        Int           @map("box_id")
+  routeId      Int?          @map("route_id")
   type         AlertType
   severity     AlertSeverity @default(WARNING)
   message      String
   acknowledged Boolean       @default(false)
   recordedAt   DateTime      @default(now()) @map("recorded_at")
 
-  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  route Route? @relation(fields: [routeId], references: [id], onDelete: SetNull)
 
+  @@index([routeId])
   @@map("alerts")
 }
 

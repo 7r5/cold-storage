@@ -151,10 +151,11 @@ async function tick(truckId) {
   // Readings for every box of the truck
   const boxes = await prisma.box.findMany({ where: { truckId } });
 
-  // Load all open (unacknowledged) alerts for this truck's boxes in one query.
-  // Used to suppress duplicate alerts: only one open alert per box+type at a time.
+  // Load open (unacknowledged) alerts scoped to THIS route.
+  // Deduplication is per (boxId, type, routeId) — not truck-wide.
+  // This prevents alerts from previous routes of the same truck bleeding in.
   const openAlerts = await prisma.alert.findMany({
-    where: { box: { truckId }, acknowledged: false },
+    where: { routeId: session.routeId, acknowledged: false },
     select: { boxId: true, type: true },
   });
   const openAlertKeys = new Set(openAlerts.map((a) => `${a.boxId}:${a.type}`));
@@ -182,7 +183,7 @@ async function tick(truckId) {
       if (openAlertKeys.has(key)) continue;
       if (!isForced && session.naturalAlertFired) continue;
       const created = await prisma.alert.create({
-        data: { boxId: box.id, ...a },
+        data: { boxId: box.id, routeId: session.routeId, ...a },
       });
       openAlertKeys.add(key); // prevent duplicates within the same tick
       if (!isForced) session.naturalAlertFired = true;
