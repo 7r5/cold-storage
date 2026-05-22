@@ -296,7 +296,7 @@ export default function DinoGame() {
             fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M15 18l-6-6 6-6"/>
           </svg>
-          <span className="text-base font-semibold text-slate-800">Modo desarrollador</span>
+          <span className="text-base font-semibold text-slate-800">Hacker, ningun sistema es seguro</span>
         </button>
       </div>
 
