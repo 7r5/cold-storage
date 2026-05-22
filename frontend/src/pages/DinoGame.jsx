@@ -15,7 +15,7 @@ const GRAVITY = 0.55;
 const JUMP_VY = -12;
 
 // Cactus constants
-const CACTUS_W = 18;
+const CACTUS_W = 30;
 
 function drawTruck(ctx, x, y, frame, dead) {
   const WR = 6;           // wheel radius
@@ -102,15 +102,50 @@ function drawTruck(ctx, x, y, frame, dead) {
 const drawDino = drawTruck;
 
 function drawCactus(ctx, x, h) {
-  const green = '#16a34a';
-  ctx.fillStyle = green;
-  // Trunk
-  ctx.fillRect(x + 4, GROUND_Y - h, CACTUS_W - 8, h);
-  // Top cap
-  ctx.fillRect(x, GROUND_Y - h, CACTUS_W, 14);
-  // Arms
-  ctx.fillRect(x - 10, GROUND_Y - h + 14, 14, 10);
-  ctx.fillRect(x + CACTUS_W - 4, GROUND_Y - h + 14, 14, 10);
+  const r = h * 0.38;                 // virus body radius (varies with h)
+  const cx = x + CACTUS_W / 2;
+  const cy = GROUND_Y - r;           // sits on the ground line
+  const spikeCount = 10;
+  const spikeLen = r * 0.4;
+
+  // ── Spikes (drawn behind the body) ───────────────────────────────
+  ctx.fillStyle = '#b91c1c';
+  for (let i = 0; i < spikeCount; i++) {
+    const angle = (i / spikeCount) * Math.PI * 2;
+    const tipX = cx + Math.cos(angle) * (r + spikeLen);
+    const tipY = cy + Math.sin(angle) * (r + spikeLen);
+    // Triangle spike
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle - 0.3) * r, cy + Math.sin(angle - 0.3) * r);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(cx + Math.cos(angle + 0.3) * r, cy + Math.sin(angle + 0.3) * r);
+    ctx.closePath();
+    ctx.fill();
+    // Ball at spike tip
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, spikeLen * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ── Main body ────────────────────────────────────────────────────
+  ctx.fillStyle = '#dc2626';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Highlight
+  ctx.fillStyle = '#fca5a5';
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.22, cy - r * 0.22, r * 0.48, 0, Math.PI * 2);
+  ctx.fill();
+
+  // RNA dots
+  ctx.fillStyle = '#991b1b';
+  [[-0.28, -0.05], [0.1, 0.22], [-0.08, 0.3]].forEach(([dx, dy]) => {
+    ctx.beginPath();
+    ctx.arc(cx + dx * r, cy + dy * r, r * 0.1, 0, Math.PI * 2);
+    ctx.fill();
+  });
 }
 
 export default function DinoGame() {
