@@ -275,7 +275,16 @@ export default function DinoGame() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-4 pb-8">
+    <div
+      className="flex flex-col items-center gap-4 pb-8 min-h-screen"
+      style={{ touchAction: 'none' }}
+      onPointerDown={(e) => {
+        // Don't intercept the back button
+        if (e.target.closest('button')) return;
+        e.preventDefault();
+        jump();
+      }}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 self-start">
         <button
@@ -299,11 +308,7 @@ export default function DinoGame() {
       </div>
 
       {/* Canvas */}
-      <div
-        className="card p-2 w-full cursor-pointer select-none"
-        style={{ touchAction: 'none' }}
-        onPointerDown={(e) => { e.preventDefault(); jump(); }}
-      >
+      <div className="card p-2 w-full cursor-pointer select-none">
         <canvas
           ref={canvasRef}
           width={W}
@@ -314,7 +319,7 @@ export default function DinoGame() {
       </div>
 
       <p className="text-xs text-slate-400 text-center">
-        Espacio · flecha arriba · tap para saltar
+        Espacio · flecha arriba · tap en cualquier parte para saltar
       </p>
     </div>
   );
