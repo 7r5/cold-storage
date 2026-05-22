@@ -19,6 +19,7 @@ import About from './pages/About';
 import Documentation from './pages/Documentation';
 import Bugs from './pages/Bugs';
 import Reviews from './pages/Reviews';
+import DinoGame from './pages/DinoGame';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/documentacion" element={<Documentation />} />
         <Route path="/bugs" element={<Bugs />} />
         <Route path="/resenas" element={<Reviews />} />
+        <Route path="/dino" element={<DinoGame />} />
         <Route
           path="/root"
           element={

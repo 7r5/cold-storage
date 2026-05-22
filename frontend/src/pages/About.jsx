@@ -1,5 +1,5 @@
 // About page
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const STACK = [
@@ -73,6 +73,20 @@ function ChangelogEntry({ entry }) {
 
   const navigate = useNavigate();
 
+  // Easter egg: 6 quick taps on the logo → dino game
+  const logoTaps = useRef(0);
+  const tapTimer = useRef(null);
+  function handleLogoTap() {
+    logoTaps.current += 1;
+    clearTimeout(tapTimer.current);
+    if (logoTaps.current >= 6) {
+      logoTaps.current = 0;
+      navigate('/dino');
+      return;
+    }
+    tapTimer.current = setTimeout(() => { logoTaps.current = 0; }, 1500);
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -87,7 +101,7 @@ function ChangelogEntry({ entry }) {
 
       {/* App identity */}
       <div className="card flex flex-col items-center gap-2 py-6 text-center">
-        <img src="/logo.jpeg" alt="ColdTrack logo" className="w-40 h-auto" />
+        <img src="/logo.jpeg" alt="ColdTrack logo" className="w-40 h-auto cursor-pointer select-none" onClick={handleLogoTap} />
         <p className="text-xs text-slate-500">Versión {__APP_VERSION__}</p>
         <span className="text-xs bg-yellow-100 text-yellow-700 font-medium px-2 py-0.5 rounded-full">
           Proof of Concept
