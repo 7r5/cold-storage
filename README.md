@@ -47,6 +47,7 @@ Reading       – temperature/humidity sensor reading from a box
 Alert         – out-of-range sensor alert (TEMP | HUM, WARNING | CRITICAL)
 Bug           – in-app bug report (status: OPEN | IN_PROGRESS | CLOSED)
 Faq           – FAQ entry displayed on the Help (Ayuda) page
+Review        – app review submitted by any logged-in user (rating 1–5 stars, optional comment)
 ```
 
 ## Local development
@@ -88,8 +89,16 @@ npm run dev                # http://localhost:5173
 ## Live demo simulation
 
 Login as `yahel` → menu **Más** → **Panel de simulación** (`/root`). From there
-you can start/stop routes and inject temperature/humidity alerts. All connected
-clients receive the events in real time via Socket.IO.
+you can start/stop routes and inject temperature/humidity anomalies:
+
+| Button | Endpoint | Effect |
+|---|---|---|
+| Alza temperatura (10s) | `POST /api/simulator/spike` | +13 °C for 10 s then resets |
+| Humedad alta (10s) | `POST /api/simulator/spike` | +30 % RH for 10 s then resets |
+| Alerta crítica (10s) | `POST /api/simulator/spike` | +22 °C → deviation ≥ 5 °C → CRITICAL severity |
+| Limpiar anomalías | `POST /api/simulator/clear` | Resets offsets immediately |
+
+All connected clients receive events in real time via Socket.IO.
 
 ## Tests
 
@@ -114,9 +123,28 @@ Coverage thresholds are enforced in CI:
 | Backend  | 90 %      | 90 %      | 90 %     | 90 %  |
 | Frontend | 90 %      | 90 %      | 90 %     | 90 %  |
 
-## Changelog — 2026-05-04
+## API endpoints (key additions v0.4.0)
 
-### New DB entities
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/reviews` | USER | List latest 50 app reviews |
+| `POST` | `/api/reviews` | USER | Submit a review `{ rating, comment? }` |
+| `POST` | `/api/simulator/spike` | ROOT | Apply anomaly for `durationMs` (default 10 s) then auto-reset |
+
+## Changelog — 2026-05-22 (v0.4.0)
+
+### v0.4.0 (2026-05-22)
+- **Reviews** (`/resenas`): new `Review` model + `GET/POST /api/reviews` + UI page with star ratings 1–5 and optional comments.
+- **Route timer / ETA**: `RouteTimer` component in Monitors shows elapsed time and estimated time to completion for active routes.
+- **Spike simulation**: `POST /api/simulator/spike` applies a forced offset for 10 s and auto-resets. Panel ROOT has dedicated buttons including "Alerta crítica (10s)".
+- **Dynamic alert severity**: `checkAlert` now emits CRITICAL when temp deviation ≥ 5 °C or humidity deviation ≥ 10 %; otherwise WARNING.
+- **Alerts page**: card now shows truck plate + driver name alongside box code.
+- **Documentation page**: all sections start collapsed; technical jargon replaced with plain language; Review entity added.
+- **Changelog page**: all entries start collapsed.
+- **Copilot instructions**: rule added requiring `Documentation.jsx` to be updated on every release.
+- **Build fix**: upgraded `@vitejs/plugin-react` `^4 → ^6` to resolve Vite 8 peer-dep conflict on Render.
+
+### v0.3.4 / earlier
 - **`Driver`** — professional driver with `firstName`, `lastName`, `licenseNumber` (unique), `phone`. Linked to `Truck` via optional FK (`driverId`). `Truck.driverName` (string) is kept for display compatibility; `Driver` is the structured record.
 - **`Faq`** — FAQ entry (`question`, `answer`, `category`, `sortOrder`) seeded from the same questions shown in the Ayuda page.
 
