@@ -7,46 +7,99 @@ const W = 600;
 const H = 160;
 const GROUND_Y = H - 24;
 
-// Dino constants
-const DINO_X = 60;
-const DINO_W = 38;
-const DINO_H = 46;
+// Truck constants
+const DINO_X = 50;
+const DINO_W = 56; // truck is wider than the dino was
+const DINO_H = 36; // truck is lower/squatter
 const GRAVITY = 0.55;
 const JUMP_VY = -12;
 
 // Cactus constants
 const CACTUS_W = 18;
 
-function drawDino(ctx, x, y, frame, dead) {
-  ctx.fillStyle = dead ? '#ef4444' : '#1e293b';
+function drawTruck(ctx, x, y, frame, dead) {
+  const WR = 6;           // wheel radius
+  const bodyH = DINO_H - WR * 2 - 2; // cargo box height (above wheels)
+  const bodyY = y;        // top of cargo box
+  const wheelY = y + DINO_H - WR; // wheel centres
 
-  // Body
-  ctx.fillRect(x, y, DINO_W, DINO_H - 12);
+  // Colour scheme
+  const cargoColor  = dead ? '#94a3b8' : '#1d4ed8'; // blue cargo box
+  const cabColor    = dead ? '#cbd5e1' : '#2563eb';
+  const stripeColor = dead ? '#cbd5e1' : '#3b82f6';
+  const wheelColor  = dead ? '#9ca3af' : '#1e293b';
+  const hubColor    = '#94a3b8';
+  const windowColor = '#bfdbfe';
+  const cabX = x + DINO_W * 0.62;
+  const cabW = DINO_W * 0.38;
+  const cabH = bodyH * 0.75;
+  const cabY = bodyY + bodyH - cabH;
 
-  // Legs (running animation)
-  if (!dead) {
-    const leg = Math.floor(frame / 5) % 2;
-    ctx.fillRect(x + 6,          y + DINO_H - 12, 9, 12 + (leg === 0 ? 4 : 0));
-    ctx.fillRect(x + DINO_W - 15, y + DINO_H - 12, 9, 12 + (leg === 1 ? 4 : 0));
-  } else {
-    ctx.fillRect(x + 6,           y + DINO_H - 12, 9, 12);
-    ctx.fillRect(x + DINO_W - 15, y + DINO_H - 12, 9, 12);
-  }
+  // ── Cargo box (left ~62% of width) ────────────────────────────
+  ctx.fillStyle = cargoColor;
+  ctx.fillRect(x, bodyY, DINO_W * 0.62, bodyH);
 
-  // Eye
-  ctx.fillStyle = dead ? '#fca5a5' : '#f8fafc';
-  ctx.fillRect(x + DINO_W - 11, y + 9, 8, 8);
-  if (dead) {
-    // X eyes
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(x + DINO_W - 13, y + 7); ctx.lineTo(x + DINO_W - 5, y + 19); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + DINO_W - 5, y + 7); ctx.lineTo(x + DINO_W - 13, y + 19); ctx.stroke();
-  } else {
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(x + DINO_W - 9, y + 11, 5, 5);
-  }
+  // Inner stripe / panel detail
+  ctx.fillStyle = stripeColor;
+  ctx.fillRect(x + 3, bodyY + 3, DINO_W * 0.62 - 6, bodyH - 6);
+
+  // Snowflake cross on cargo (cold-chain theme)
+  ctx.strokeStyle = windowColor;
+  ctx.lineWidth = 1.8;
+  const cx = x + DINO_W * 0.31;
+  const cy = bodyY + bodyH / 2;
+  const r = 5;
+  [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,-0.7],[0.7,-0.7],[-0.7,0.7]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dx*r, cy + dy*r); ctx.stroke();
+  });
+
+  // ── Cab (right ~38% of width) ─────────────────────────────────
+  ctx.fillStyle = cabColor;
+  ctx.fillRect(cabX, cabY, cabW, cabH);
+
+  // Windshield
+  ctx.fillStyle = windowColor;
+  ctx.fillRect(cabX + 3, cabY + 3, cabW - 8, cabH * 0.55);
+
+  // Front bumper
+  ctx.fillStyle = dead ? '#94a3b8' : '#1e40af';
+  ctx.fillRect(x + DINO_W - 3, cabY + cabH * 0.55, 4, cabH * 0.35);
+
+  // Divider between cargo and cab
+  ctx.fillStyle = dead ? '#94a3b8' : '#1e3a8a';
+  ctx.fillRect(cabX - 2, bodyY, 3, bodyH);
+
+  // ── Wheels ────────────────────────────────────────────────────
+  const wheelPositions = [x + DINO_W * 0.17, x + DINO_W * 0.77];
+  const spoke = frame * 0.07; // rotation angle
+  wheelPositions.forEach((wx) => {
+    // Tyre
+    ctx.fillStyle = wheelColor;
+    ctx.beginPath();
+    ctx.arc(wx, wheelY, WR, 0, Math.PI * 2);
+    ctx.fill();
+    // Hub
+    ctx.fillStyle = hubColor;
+    ctx.beginPath();
+    ctx.arc(wx, wheelY, WR * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    // Spokes (only while alive)
+    if (!dead) {
+      ctx.strokeStyle = hubColor;
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const a = spoke + (i * Math.PI * 2) / 3;
+        ctx.beginPath();
+        ctx.moveTo(wx, wheelY);
+        ctx.lineTo(wx + Math.cos(a) * WR * 0.82, wheelY + Math.sin(a) * WR * 0.82);
+        ctx.stroke();
+      }
+    }
+  });
 }
+
+// Keep legacy alias so callers don't need changing
+const drawDino = drawTruck;
 
 function drawCactus(ctx, x, h) {
   const green = '#16a34a';
@@ -256,7 +309,7 @@ export default function DinoGame() {
           width={W}
           height={H}
           className="w-full rounded"
-          aria-label="Juego del dinosaurio"
+          aria-label="Juego del camión"
         />
       </div>
 
