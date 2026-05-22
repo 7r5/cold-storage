@@ -1,5 +1,5 @@
 // Secret dino game — unlocked by clicking the logo 6 times in /acerca-de
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Canvas dimensions (logical pixels — scaled to full width via CSS)
@@ -152,6 +152,22 @@ export default function DinoGame() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
+  // High score — persisted in localStorage, per device
+  const [highScore, setHighScore] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('truckHighScore') || '{"score":0,"name":""}'); }
+    catch { return { score: 0, name: '' }; }
+  });
+  const highScoreRef = useRef(null);
+  useEffect(() => { highScoreRef.current = highScore; }, [highScore]);
+
+  // Name-input overlay — shown when a new record is set
+  const [overlay, setOverlay] = useState(null); // { score: number } | null
+  const [nameInput, setNameInput] = useState('');
+  const overlayActive = useRef(false);
+  // Updated every render so the game loop can call it without stale closure
+  const triggerOverlay = useRef(null);
+  triggerOverlay.current = (data) => { overlayActive.current = true; setOverlay(data); };
+
   // All mutable game state lives in a ref — no React re-renders inside the loop
   const g = useRef({
     dinoY: GROUND_Y - DINO_H,
@@ -166,7 +182,18 @@ export default function DinoGame() {
 
   const rafId = useRef(null);
 
+  function saveRecord() {
+    const name = nameInput.trim() || 'Anónimo';
+    const record = { score: overlay.score, name };
+    localStorage.setItem('truckHighScore', JSON.stringify(record));
+    setHighScore(record);
+    setOverlay(null);
+    setNameInput('');
+    overlayActive.current = false;
+  }
+
   function jump() {
+    if (overlayActive.current) return; // esperando que ingresen nombre
     const s = g.current;
     if (s.phase === 'idle') { s.phase = 'playing'; return; }
     if (s.phase === 'dead') {
@@ -191,6 +218,16 @@ export default function DinoGame() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
+    function drawHiScore() {
+      const hs = highScoreRef.current;
+      if (!hs || hs.score <= 0) return;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'left';
+      const label = hs.name ? `Récord: ${hs.score} · ${hs.name}` : `Récord: ${hs.score}`;
+      ctx.fillText(label, 8, 16);
+    }
+
     function loop() {
       const s = g.current;
       ctx.clearRect(0, 0, W, H);
@@ -209,6 +246,7 @@ export default function DinoGame() {
 
       if (s.phase === 'idle') {
         drawDino(ctx, DINO_X, GROUND_Y - DINO_H, 0, false);
+        drawHiScore();
         ctx.fillStyle = '#475569';
         ctx.font = 'bold 15px monospace';
         ctx.textAlign = 'center';
@@ -220,14 +258,18 @@ export default function DinoGame() {
       if (s.phase === 'dead') {
         drawDino(ctx, DINO_X, s.dinoY, s.frame, true);
         s.cacti.forEach((c) => drawCactus(ctx, c.x, c.h));
+        drawHiScore();
 
         ctx.fillStyle = '#1e293b';
         ctx.font = 'bold 20px monospace';
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER', W / 2, H / 2 - 8);
-        ctx.font = '12px monospace';
-        ctx.fillStyle = '#64748b';
-        ctx.fillText('Espacio / tap para reintentar', W / 2, H / 2 + 14);
+
+        if (!overlayActive.current) {
+          ctx.font = '12px monospace';
+          ctx.fillStyle = '#64748b';
+          ctx.fillText('Espacio / tap para reintentar', W / 2, H / 2 + 14);
+        }
 
         ctx.fillStyle = '#475569';
         ctx.font = 'bold 13px monospace';
@@ -276,6 +318,9 @@ export default function DinoGame() {
         const cTop   = GROUND_Y - c.h;
         if (dinoRight > cLeft && dinoLeft < cRight && dinoBottom > cTop) {
           s.phase = 'dead';
+          if (Math.floor(s.score) > (highScoreRef.current?.score ?? 0)) {
+            triggerOverlay.current({ score: Math.floor(s.score) });
+          }
           break;
         }
       }
@@ -283,6 +328,7 @@ export default function DinoGame() {
       // Draw
       drawDino(ctx, DINO_X, s.dinoY, s.frame, false);
       s.cacti.forEach((c) => drawCactus(ctx, c.x, c.h));
+      drawHiScore();
 
       // Score
       ctx.fillStyle = '#475569';
@@ -314,7 +360,7 @@ export default function DinoGame() {
       className="space-y-4 pb-4 min-h-screen"
       style={{ touchAction: 'none' }}
       onPointerDown={(e) => {
-        if (e.target.closest('button')) return;
+        if (e.target.closest('button, input')) return;
         e.preventDefault();
         jump();
       }}
@@ -339,7 +385,7 @@ export default function DinoGame() {
       </div>
 
       {/* Canvas */}
-      <div className="card p-2 w-full cursor-pointer select-none">
+      <div className="card p-2 w-full cursor-pointer select-none relative">
         <canvas
           ref={canvasRef}
           width={W}
@@ -347,6 +393,35 @@ export default function DinoGame() {
           className="w-full rounded"
           aria-label="Juego del camión"
         />
+
+        {/* Nuevo récord — overlay para ingresar nombre */}
+        {overlay && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 rounded">
+            <div
+              className="bg-white rounded-2xl shadow-xl p-5 flex flex-col gap-3 w-64"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-center text-lg font-bold text-slate-800">🏆 ¡Nuevo récord!</p>
+              <p className="text-center text-3xl font-mono font-bold text-blue-600">{overlay.score}</p>
+              <input
+                autoFocus
+                type="text"
+                maxLength={20}
+                placeholder="Tu nombre"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveRecord(); e.stopPropagation(); }}
+                className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500"
+              />
+              <button
+                onClick={saveRecord}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 text-sm"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <p className="text-xs text-slate-400 text-center">
