@@ -8,6 +8,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 ---
 ## [0.4.0] — 2026-05-22
 
+### Fixed
+- Deploy Render: actualizado `@vitejs/plugin-react` de `^4.3.3` a `^6.0.2` para resolver conflicto de peer deps con `vite@^8`. El build local y remoto ahora pasan sin `--legacy-peer-deps`.
+
 ### Added
 - Reseñas: nueva entidad `Review` (schema + API `GET/POST /api/reviews` + página `/resenas`). Calificación 1–5 estrellas y comentario opcional.
 - Monitores: temporizador en vivo en cada tarjeta de ruta activa — muestra tiempo en ruta (Xm Xs) y tiempo estimado para finalizar (ETA).
