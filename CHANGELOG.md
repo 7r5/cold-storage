@@ -6,7 +6,7 @@ Todas las versiones notables de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
-## [0.3.5] — 2026-05-06
+## [0.4.0] — 2026-05-22
 
 ### Added
 - Reseñas: nueva entidad `Review` (schema + API `GET/POST /api/reviews` + página `/resenas`). Calificación 1–5 estrellas y comentario opcional.
