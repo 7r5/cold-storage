@@ -288,6 +288,16 @@ model Review {
   @@map("reviews")
 }
 
+// Easter egg truck-game leaderboard score
+model GameScore {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(20)
+  score     Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("game_scores")
+}
+
 // FAQ entry displayed in the Ayuda (Help) page
 model Faq {
   id        Int      @id @default(autoincrement())

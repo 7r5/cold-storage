@@ -13,6 +13,7 @@ const simulatorRoutes = require('./routes/simulator');
 const bugsRoutes = require('./routes/bugs');
 const branchesRoutes = require('./routes/branches');
 const reviewsRoutes = require('./routes/reviews');
+const scoresRoutes = require('./routes/scores');
 const { requireAuth } = require('./middleware/auth');
 
 function createApp() {
@@ -35,6 +36,7 @@ function createApp() {
   app.use('/api/bugs', bugsRoutes);
   app.use('/api/branches', branchesRoutes);
   app.use('/api/reviews', reviewsRoutes);
+  app.use('/api/scores', scoresRoutes);   // Public Easter egg leaderboard
   app.use('/api/simulator', simulatorRoutes);
 
   // 404

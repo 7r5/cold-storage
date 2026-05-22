@@ -1,6 +1,7 @@
 // Secret dino game — unlocked by clicking the logo 6 times in /acerca-de
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
 
 // Canvas dimensions (logical pixels — scaled to full width via CSS)
 const W = 600;
@@ -152,15 +153,20 @@ export default function DinoGame() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  // High score — persisted in localStorage, per device
-  const [highScore, setHighScore] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('truckHighScore') || '{"score":0,"name":""}'); }
-    catch { return { score: 0, name: '' }; }
-  });
-  const highScoreRef = useRef(null);
-  useEffect(() => { highScoreRef.current = highScore; }, [highScore]);
+  // Global leaderboard — top 10 from API
+  const [scores, setScores] = useState([]);
+  const topScoreRef = useRef({ score: 0, name: '' });
+  const refreshScores = useRef(null);
+  refreshScores.current = async () => {
+    try {
+      const data = await api.get('/api/scores');
+      setScores(data);
+      topScoreRef.current = data[0] ?? { score: 0, name: '' };
+    } catch { /* ignore in Easter egg */ }
+  };
+  useEffect(() => { refreshScores.current(); }, []);
 
-  // Name-input overlay — shown when a new record is set
+  // Name-input overlay — shown on every death with score ≥ 5
   const [overlay, setOverlay] = useState(null); // { score: number } | null
   const [nameInput, setNameInput] = useState('');
   const overlayActive = useRef(false);
@@ -182,11 +188,18 @@ export default function DinoGame() {
 
   const rafId = useRef(null);
 
-  function saveRecord() {
+  async function saveRecord() {
     const name = nameInput.trim() || 'Anónimo';
-    const record = { score: overlay.score, name };
-    localStorage.setItem('truckHighScore', JSON.stringify(record));
-    setHighScore(record);
+    try {
+      await api.postPublic('/api/scores', { name, score: overlay.score });
+    } catch { /* best-effort */ }
+    await refreshScores.current();
+    setOverlay(null);
+    setNameInput('');
+    overlayActive.current = false;
+  }
+
+  function skipRecord() {
     setOverlay(null);
     setNameInput('');
     overlayActive.current = false;
@@ -219,7 +232,7 @@ export default function DinoGame() {
     const ctx = canvas.getContext('2d');
 
     function drawHiScore() {
-      const hs = highScoreRef.current;
+      const hs = topScoreRef.current;
       if (!hs || hs.score <= 0) return;
       ctx.fillStyle = '#94a3b8';
       ctx.font = '11px monospace';
@@ -318,7 +331,7 @@ export default function DinoGame() {
         const cTop   = GROUND_Y - c.h;
         if (dinoRight > cLeft && dinoLeft < cRight && dinoBottom > cTop) {
           s.phase = 'dead';
-          if (Math.floor(s.score) > (highScoreRef.current?.score ?? 0)) {
+          if (Math.floor(s.score) >= 5) {
             triggerOverlay.current({ score: Math.floor(s.score) });
           }
           break;
@@ -356,17 +369,9 @@ export default function DinoGame() {
   }, []);
 
   return (
-    <div
-      className="space-y-4 pb-4 min-h-screen"
-      style={{ touchAction: 'none' }}
-      onPointerDown={(e) => {
-        if (e.target.closest('button, input')) return;
-        e.preventDefault();
-        jump();
-      }}
-    >
-      {/* Header — mismo patrón que otras páginas */}
-      <div className="flex items-center gap-2">
+    <div className="h-[100dvh] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="shrink-0 flex items-center gap-2 px-4 pt-4 pb-2">
         <button
           onClick={() => navigate(-1)}
           aria-label="Volver"
@@ -378,55 +383,103 @@ export default function DinoGame() {
           </svg>
           <span className="text-base font-semibold text-slate-800">Modo desarrollador</span>
         </button>
-
-        <span className="ml-2 text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-          Easter egg desbloqueado
+        <span className="ml-auto text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+          Easter egg
         </span>
       </div>
 
-      {/* Canvas */}
-      <div className="card p-2 w-full cursor-pointer select-none relative">
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          className="w-full rounded"
-          aria-label="Juego del camión"
-        />
+      {/* Body: game + leaderboard */}
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 px-4 pb-4">
 
-        {/* Nuevo récord — overlay para ingresar nombre */}
-        {overlay && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 rounded">
-            <div
-              className="bg-white rounded-2xl shadow-xl p-5 flex flex-col gap-3 w-64"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-center text-lg font-bold text-slate-800">🏆 ¡Nuevo récord!</p>
-              <p className="text-center text-3xl font-mono font-bold text-blue-600">{overlay.score}</p>
-              <input
-                autoFocus
-                type="text"
-                maxLength={20}
-                placeholder="Tu nombre"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') saveRecord(); e.stopPropagation(); }}
-                className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500"
-              />
-              <button
-                onClick={saveRecord}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 text-sm"
-              >
-                Guardar
-              </button>
-            </div>
+        {/* Game column */}
+        <div className="flex flex-col gap-2 md:flex-1">
+          {/* Canvas — tap area */}
+          <div
+            className="card p-2 cursor-pointer select-none relative"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => {
+              if (e.target.closest('button, input')) return;
+              e.preventDefault();
+              jump();
+            }}
+          >
+            <canvas
+              ref={canvasRef}
+              width={W}
+              height={H}
+              className="w-full rounded"
+              aria-label="Juego del camión"
+            />
+
+            {/* New score overlay */}
+            {overlay && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 rounded">
+                <div
+                  className="bg-white rounded-2xl shadow-xl p-5 flex flex-col gap-3 w-64"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="text-center text-lg font-bold text-slate-800">🏆 ¡Nueva puntuación!</p>
+                  <p className="text-center text-3xl font-mono font-bold text-blue-600">{overlay.score}</p>
+                  <input
+                    autoFocus
+                    type="text"
+                    maxLength={20}
+                    placeholder="Tu nombre"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveRecord(); e.stopPropagation(); }}
+                    className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-500"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={skipRecord}
+                      className="flex-1 border border-slate-300 text-slate-600 font-semibold rounded-lg py-2 text-sm hover:bg-slate-50"
+                    >
+                      Saltar
+                    </button>
+                    <button
+                      onClick={saveRecord}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg py-2 text-sm"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+          <p className="text-xs text-slate-400 text-center shrink-0">
+            Espacio · ↑ · tap para saltar
+          </p>
+        </div>
 
-      <p className="text-xs text-slate-400 text-center">
-        Espacio · flecha arriba · tap en cualquier parte para saltar
-      </p>
+        {/* Leaderboard column */}
+        <div className="md:w-52 flex flex-col min-h-0 gap-2">
+          <p className="text-sm font-bold text-slate-700 shrink-0">🏆 Top 10</p>
+          <div className="card flex-1 overflow-y-auto p-2 min-h-0">
+            {scores.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">
+                Sé el primero en el marcador
+              </p>
+            ) : (
+              <ol className="space-y-1">
+                {scores.map((s, i) => (
+                  <li key={s.id} className="flex items-center gap-2 text-sm">
+                    <span className={`w-5 text-center font-bold shrink-0 ${
+                      i === 0 ? 'text-yellow-500' :
+                      i === 1 ? 'text-slate-400' :
+                      i === 2 ? 'text-amber-600' : 'text-slate-300'
+                    }`}>{i + 1}</span>
+                    <span className="flex-1 truncate text-slate-700">{s.name}</span>
+                    <span className="font-mono font-bold text-blue-600 shrink-0">{s.score}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
