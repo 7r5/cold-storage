@@ -311,17 +311,16 @@ export default function DinoGame() {
 
   return (
     <div
-      className="flex flex-col items-center gap-4 pb-8 min-h-screen"
+      className="space-y-4 pb-4 min-h-screen"
       style={{ touchAction: 'none' }}
       onPointerDown={(e) => {
-        // Don't intercept the back button
         if (e.target.closest('button')) return;
         e.preventDefault();
         jump();
       }}
     >
-      {/* Header */}
-      <div className="flex items-center gap-2 self-start">
+      {/* Header — mismo patrón que otras páginas */}
+      <div className="flex items-center gap-2">
         <button
           onClick={() => navigate(-1)}
           aria-label="Volver"
@@ -331,13 +330,10 @@ export default function DinoGame() {
             fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M15 18l-6-6 6-6"/>
           </svg>
-          <span className="text-base font-semibold text-slate-800">Hacker, ningun sistema es seguro</span>
+          <span className="text-base font-semibold text-slate-800">Modo desarrollador</span>
         </button>
-      </div>
 
-      {/* Badge */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+        <span className="ml-2 text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
           Easter egg desbloqueado
         </span>
       </div>
