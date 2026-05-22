@@ -388,21 +388,21 @@ export default function DinoGame() {
         </span>
       </div>
 
-      {/* Body: game + leaderboard */}
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 px-4 pb-4">
+      {/* Body: game + leaderboard — tap anywhere to jump */}
+      <div
+        className="flex-1 min-h-0 flex flex-col md:flex-row gap-3 px-4 pb-4"
+        style={{ touchAction: 'none' }}
+        onPointerDown={(e) => {
+          if (e.target.closest('button, input')) return;
+          e.preventDefault();
+          jump();
+        }}
+      >
 
         {/* Game column */}
         <div className="flex flex-col gap-2 md:flex-1">
-          {/* Canvas — tap area */}
-          <div
-            className="card p-2 cursor-pointer select-none relative"
-            style={{ touchAction: 'none' }}
-            onPointerDown={(e) => {
-              if (e.target.closest('button, input')) return;
-              e.preventDefault();
-              jump();
-            }}
-          >
+          {/* Canvas */}
+          <div className="card p-2 cursor-pointer select-none relative">
             <canvas
               ref={canvasRef}
               width={W}
